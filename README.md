@@ -140,3 +140,4 @@ Todo
  * implement default properties (generate methods and register in initialize)
  * parameter to chose setters and getters name.
  * add a calback to convert property value
+ * add namespace
