@@ -6,24 +6,26 @@ The *ExtraPropertiesBehavior* helps key/value extension for an object.
 Basic example
 -------------
 
-Given a product, *ExtraPropertiesBehavior* provides extra property fields.
+Given a product, *ExtraPropertiesBehavior* add key/value extension.
 
 ``` xml
 <table name="product">
   <column name="id" type="INTEGER" primaryKey="true" autoincrement="true" />
   <column name="name" type="VARCHAR" size="255" />
-  <!-- .... -->
   <behavior name="extra_properties" />
 </table>
 ```
 
 ``` php
-$user = new Product();
-$user->setName('foo');
-$user->setProperty('my_preference', 'my_preference_value');
-$user->save();
+<?php
+$tvSet = new Product();
+$tvSet->setName('My big TV');
+$tvSet->setProperty('size', '12 inches');
+$tvSet->setProperty('frequency', '11 Hz');
+$tvSet->save();
 
-$user->getProperty('my_preference'); // will result in 'my_preference_value'
+$tvSet->getProperty('size'); // will result in '12 inches'
+$tvSet->getProperty('frequency'); // will result in 'frequency'
 ```
 
 Installation
@@ -89,10 +91,11 @@ First declare the behavior in the ```schema.xml``` :
     <column name="key" type="VARCHAR" size="50" />
     <column name="value" type="LONGVARCHAR" />
     <column name="user_id" type="integer" required="true" />
-    <foreign-key foreignTable="user" onDelete="cascade">
+    <foreign-key foreignTable="user" onDelete="cascade" refPhpName="Preference">
       <reference local="user_id" foreign="id" />
     </foreign-key>
   </table>
+
   <table name="user">
     <column name="id" type="INTEGER" primaryKey="true" autoincrement="true" />
     <column name="name" type="VARCHAR" size="255" />
@@ -111,6 +114,7 @@ First declare the behavior in the ```schema.xml``` :
 To enable humanized getters, you can declare properties during your initilization boot or anywhere else...
 
 ``` php
+<?php
 class User extends BaseUser
 {
   protected function initialize()
@@ -123,16 +127,100 @@ class User extends BaseUser
 Then, anywhere just access preferences as follow :
 
 ``` php
+<?php
+// built in extension
 $user->getMyModulePreference();             // or call $user->getProperty('my_module_preference');
 $user->setMyModulePreference('preference'); // or call $user->setProperty('my_module_preference', 'preference');
 
+// extend dynamicly
 $user->registerExtraProperty('MY_OTHER_PREFERENCE', 'default_value');
 $user->getMyOtherPreference();             // or call $user->getProperty('my_other_preference');
 $user->setMyOtherPreference('preference'); // or call $user->setProperty('my_other_preference', 'preference');
+
+// simply deal with multiple occurences
+$user->registerExtraProperty('MY_MULTIPLE_PREFERENCE');
+$user->addMyMultiplePreference('pref1');
+$user->addMyMultiplePreference('pref2');
+$user->save();
+
+$user->getMyMultiplePreferences();        // will result in array('id_pref1' => 'pref1', 'id_pref2' => 'pref2')
+$user->clearMyMultiplePreferences();      // remove all MY_MULTIPLE_PREFERENCE preferences
+$user->save();
 ```
 
+Use with single inheritance
+---------------------------
 
+It sometimes is useful to be able to extend the model depending on the inheritance classkey.
+*ExtraPropertiesBehavior* can do that for you.
 
+Imagine a CMS with several content types :
+
+``` xml
+<database name="content">
+  <table name="content">
+    <column name="id" type="INTEGER" primaryKey="true" autoincrement="true" />
+    <column name="title" type="VARCHAR" size="255" />
+    <column name="type" type="VARCHAR" inheritance="single">
+    <behavior name="extra_properties" />
+  </table>
+</database>
+```
+
+Given the default content structure, just define your contents by defining your possible key/values in the 
+initializeProperties method:
+
+``` php
+<?php
+class Article extends Content
+{
+  protected function initializeProperties()
+  {
+    $this->registerExtraProperty('CONTENT');
+    $this->registerExtraProperty('AUTHOR');
+  }
+
+  public function getOMClass()
+  {
+    return 'Article';
+  }
+}
+```
+
+and
+
+``` php
+<?php
+class Video extends Content
+{
+  protected function initializeProperties()
+  {
+    $this->registerExtraProperty('URL');
+    $this->registerExtraProperty('LENGTH');
+  }
+
+  public function getOMClass()
+  {
+    return 'Video';
+  }
+}
+```
+
+Then, just use extra properties as if it where built in fields :
+
+``` php
+<?php
+$article = new Article();
+$article->setTitle('Propel, greatest php ORM ever');
+$article->setContent('Try it you\'ll see');
+$article->save();
+
+$video = new Video();
+$video->setTitle('Propel + phpsh');
+$video->setUrl('http://vimeo.com/15140218');
+$video->setLength('2:01');
+$video->save();
+```
 
 Todo
 ----
