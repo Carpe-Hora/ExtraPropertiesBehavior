@@ -15,7 +15,7 @@ Basic example
 
 Given a product, *ExtraPropertiesBehavior* add key/value extension.
 
-``` xml
+{% highlight xml %}
 <table name="product">
   <column name="id" type="INTEGER" primaryKey="true" autoincrement="true" />
   <column name="name" type="VARCHAR" size="255" />
@@ -55,7 +55,7 @@ Usage
 
 Just declare the behavior in your table definition :
 
-``` xml
+{% highlight xml %}
 <!-- in schema.xml -->
 <behavior name="extra_properties" />
 {% endhighlight %}
@@ -91,7 +91,7 @@ Configuration
 
 First declare the behavior in the ```schema.xml``` :
 
-``` xml
+{% highlight xml %}
 <database name="user">
   <table name="user_preference">
     <column name="id" type="INTEGER" primaryKey="true" autoincrement="true" />
@@ -163,7 +163,7 @@ It sometimes is useful to be able to extend the model depending on the inheritan
 
 Imagine a CMS with several content types :
 
-``` xml
+{% highlight xml %}
 <database name="content">
   <table name="content">
     <column name="id" type="INTEGER" primaryKey="true" autoincrement="true" />
