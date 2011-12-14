@@ -23,7 +23,7 @@ Given a product, *ExtraPropertiesBehavior* add key/value extension.
 </table>
 {% endhighlight %}
 
-``` php
+{% highlight php %}
 <?php
 $tvSet = new Product();
 $tvSet->setName('My big TV');
@@ -120,7 +120,7 @@ First declare the behavior in the ```schema.xml``` :
 
 To enable humanized getters, you can declare properties during your initilization boot or anywhere else...
 
-``` php
+{% highlight php %}
 <?php
 class User extends BaseUser
 {
@@ -133,7 +133,7 @@ class User extends BaseUser
 
 Then, anywhere just access preferences as follow :
 
-``` php
+{% highlight php %}
 <?php
 // built in extension
 $user->getMyModulePreference();             // or call $user->getProperty('my_module_preference');
@@ -177,7 +177,7 @@ Imagine a CMS with several content types :
 Given the default content structure, just define your contents by defining your possible key/values in the 
 initializeProperties method:
 
-``` php
+{% highlight php %}
 <?php
 class Article extends Content
 {
@@ -196,7 +196,7 @@ class Article extends Content
 
 and
 
-``` php
+{% highlight php %}
 <?php
 class Video extends Content
 {
@@ -215,7 +215,7 @@ class Video extends Content
 
 Then, just use extra properties as if it where built in fields :
 
-``` php
+{% highlight php %}
 <?php
 $article = new Article();
 $article->setTitle('Propel, greatest php ORM ever');
