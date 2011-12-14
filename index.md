@@ -40,13 +40,13 @@ Installation
 
 First clone the behavior in your vendor directory
 
-{% endhighlight %}
+{% highlight bash %}
 git clone git://github.com/Carpe-Hora/ExtraPropertiesBehavior.git
 {% endhighlight %}
 
 then register behavior in your ```propel.ini``` or ```buid.properties``` configuration files :
 
-``` ini
+{% highlight ini %}
 propel.behavior.extra_properties.class = path.to.ExtraPropertiesBehavior
 {% endhighlight %}
 
