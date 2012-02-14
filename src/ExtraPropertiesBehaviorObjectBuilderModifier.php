@@ -243,7 +243,7 @@ public function registerProperty(\$propertyName, \$defaultValue = null)
 public function setProperty(\$name, \$value, PropelPDO \$con = null)
 {
   \$name = strtoupper(\$name);
-  if(\$this->hasProperty(\$name))
+  if(\$this->hasProperty(\$name, \$con))
   {
     \$properties = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
     foreach(\$properties as \$prop)
