@@ -8,6 +8,7 @@
  */
 
 require_once __DIR__ . '/ExtraPropertiesBehaviorObjectBuilderModifier.php';
+require_once __DIR__ . '/ExtraPropertiesBehaviorQueryBuilderModifier.php';
 
 /**
  * @author Julien Muetton <julien_muetton@carpe-hora.com>
@@ -147,6 +148,20 @@ class ExtraPropertiesBehavior extends Behavior
       return $this->objectBuilderModifier;
     }
 
+    public function getQueryBuilderModifier()
+    {
+      if (is_null($this->queryBuilderModifier))
+      {
+        $this->queryBuilderModifier = new ExtraPropertiesBehaviorQueryBuilderModifier($this);
+      }
+      return $this->queryBuilderModifier;
+    }
+
+    /**
+     *
+     * @param type $parameter
+     * @return type
+     */
     public function getPropertyColumnForParameter($parameter)
     {
       return $this->propertyTable->getColumn($this->getParameter($parameter));
