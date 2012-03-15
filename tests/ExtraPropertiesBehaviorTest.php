@@ -10,7 +10,7 @@
  */
 
 $_SERVER['PROPEL_DIR'] = dirname(__FILE__) . '/../../../../plugins/sfPropelORMPlugin/lib/vendor/propel/';
-$_SERVER['PROPEL_DIR'] = '/home/kevin/www/t-resa/plugins/sfPropelORMPlugin/lib/vendor/propel';
+//$_SERVER['PROPEL_DIR'] = '/home/kevin/www/t-resa/plugins/sfPropelORMPlugin/lib/vendor/propel';
 $propel_dir = isset($_SERVER['PROPEL_DIR']) ? $_SERVER['PROPEL_DIR'] : dirname(__FILE__) . '/../../../../../plugins/sfPropelORMPlugin/lib/vendor/propel/';
 $behavior_dir = file_exists(__DIR__ . '/../src/')
                     ? __DIR__ . '/../src'
@@ -262,7 +262,6 @@ EOF;
     $book->setProperty('num_pages', 280);
     $book->setProperty('color', 'blue');
     $book->save();
-
 
     $count_all = ProductQuery::create()
       ->count();
