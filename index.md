@@ -2,11 +2,13 @@
 layout: default
 title: ExtraPropertiesBehavior
 github_url: http://github.com/Carpe-Hora/ExtraPropertiesBehavior
-date: 2011-12-14
+date: 2012-03-16
 ---
 
 ExtraPropertiesBehavior
 =======================
+
+[![Build Status](https://secure.travis-ci.org/Carpe-Hora/ExtraPropertiesBehavior.png?branch=master)](http://travis-ci.org/Carpe-Hora/ExtraPropertiesBehavior)
 
 The *ExtraPropertiesBehavior* helps key/value extension for an object.
 
@@ -40,7 +42,7 @@ Installation
 
 First clone the behavior in your vendor directory
 
-{% highlight bash %}
+{% endhighlight %}
 git clone git://github.com/Carpe-Hora/ExtraPropertiesBehavior.git
 {% endhighlight %}
 
