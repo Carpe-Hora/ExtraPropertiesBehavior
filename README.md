@@ -1,6 +1,8 @@
 ExtraPropertiesBehavior
 =======================
 
+[![Build Status](https://secure.travis-ci.org/Carpe-Hora/ExtraPropertiesBehavior.png?branch=master)](http://travis-ci.org/Carpe-Hora/ExtraPropertiesBehavior)
+
 The *ExtraPropertiesBehavior* helps key/value extension for an object.
 
 Basic example
