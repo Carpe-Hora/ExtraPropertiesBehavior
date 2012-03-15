@@ -1,0 +1,18 @@
+{
+  "name": "CarpeHora/ExtraPropertiesBehavior",
+  "description": "ExtraPropertiesBehavior is a propel behavior to store key/value extra fields in a propel model.",
+  "keywords": ["Propel", "Behavior", "ExtraProperties", "Key value"],
+  "homepage": "http://carpe-hora.github.com/ExtraPropertiesBehavior/",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Julien Muetton",
+      "email": "julien_muetton@carpe-hora.com",
+      "homepage": "http://www.carpe-hora.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.2.4",
+    "propel/propel1": ">=1.6.4"
+  }
+}
