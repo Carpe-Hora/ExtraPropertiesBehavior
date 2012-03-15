@@ -1,0 +1,14 @@
+language: php
+
+php:
+  - 5.3
+  - 5.4
+
+before_script:
+
+  # Composer
+  - wget http://getcomposer.org/composer.phar
+  - php composer.phar install
+  - cat phpunit.xml.dist | sed -e 's:YOUR_PROPEL_PATH:${pwd}/vendor/propel/propel1:' > phpunit.xml
+
+script: phpunit
