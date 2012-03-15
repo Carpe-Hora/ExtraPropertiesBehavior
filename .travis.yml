@@ -6,6 +6,10 @@ php:
 
 before_script:
 
+  # phing
+  - pyrus channel-discover pear.phing.info
+  - pyrus install phing/phing
+
   # Composer
   - wget http://getcomposer.org/composer.phar
   - php composer.phar install
