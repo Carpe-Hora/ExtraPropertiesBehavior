@@ -121,6 +121,7 @@ class ExtraPropertiesBehaviorObjectBuilderModifier
     $script .= $this->getInitializePropertiesMethod();
     $script .= $this->getSinglePropertyRegistrationMethods();
     $script .= $this->getMultiplePropertyRegistrationMethods();
+    $script .= $this->getGetExtraPropertiesMethods();
     return $script;
   }
 
@@ -217,7 +218,7 @@ public function getRegisteredSingleProperties()
  */
 public function registerProperty(\$propertyName, \$defaultValue = null)
 {
-  \$propertyName = strtoupper(\$propertyName);
+  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
   /* comment this line to remove default value update ability
   if(!array_key_exists(\$propertyName, \$this->extraProperties))
   {
@@ -242,7 +243,7 @@ public function registerProperty(\$propertyName, \$defaultValue = null)
  */
 public function setProperty(\$name, \$value, PropelPDO \$con = null)
 {
-  \$name = strtoupper(\$name);
+  \$name = {$this->peerClassname}::normalizeExtraPropertyName(\$name);
   if(\$this->hasProperty(\$name, \$con))
   {
     \$properties = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
@@ -250,7 +251,7 @@ public function setProperty(\$name, \$value, PropelPDO \$con = null)
     {
       if(\$prop->{$this->getPropertyColumnGetter('property_name_column')}() == \$name)
       {
-        \$prop->{$this->getPropertyColumnSetter('property_value_column')}(\$value);
+        \$prop->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalizeExtraPropertyValue(\$value));
         return \$this;
       }
     }
@@ -259,7 +260,7 @@ public function setProperty(\$name, \$value, PropelPDO \$con = null)
   {
     \$property = new {$this->getPropertyActiveRecordClassName()}();
     \$property->{$this->getPropertyColumnSetter('property_name_column')}(\$name);
-    \$property->{$this->getPropertyColumnSetter('property_value_column')}(\$value);
+    \$property->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalizeExtraPropertyValue(\$value));
     \$this->{$this->getPropertyObjectsSetter()}(\$property);
   }
   return \$this;
@@ -277,7 +278,7 @@ public function setProperty(\$name, \$value, PropelPDO \$con = null)
 public function getProperty(\$propertyName, \$defaultValue = null, PropelPDO \$con = null)
 {
   \$properties = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
-  \$propertyName = strtoupper(\$propertyName);
+  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
   foreach(\$properties as \$prop)
   {
     if(\$prop->{$this->getPropertyColumnGetter('property_name_column')}() == \$propertyName)
@@ -340,7 +341,7 @@ public function countPropertiesByName(\$propertyName, PropelPDO \$con = null)
 {
   \$count = 0;
   \$properties = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
-  \$propertyName = strtoupper(\$propertyName);
+  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
   foreach(\$properties as \$prop)
   {
     if(\$prop->{$this->getPropertyColumnGetter('property_name_column')}() == \$propertyName)
@@ -364,7 +365,7 @@ protected function setPropertyById(\$id, \$value, PropelPDO \$con = null)
   \$prop = \$this->getPropertyObjectById(\$id, \$con);
   if(\$prop instanceof {$this->getPropertyTableName()})
   {
-    \$prop->{$this->getPropertyColumnSetter('property_value_column')}(\$value);
+    \$prop->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalizeExtraPropertyValue(\$value));
     return \$this;
   }
   else
@@ -385,7 +386,7 @@ protected function getPropertiesObjectsByName(\$propertyName, PropelPDO \$con = 
 {
   \$ret = array();
   \$properties = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
-  \$propertyName = strtoupper(\$propertyName);
+  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
   foreach(\$properties as \$prop)
   {
     if(\$prop->{$this->getPropertyColumnGetter('property_name_column')}() == \$propertyName)
@@ -435,7 +436,7 @@ protected function getPropertyObjectById(\$id, PropelPDO \$con = null)
 protected function isPropertyWithIdA(\$id, \$propertyName, PropelPDO \$con = null)
 {
   \$prop = \$this->getPropertyObjectById(\$id, \$con);
-  return \$prop && \$prop->{$this->getPropertyColumnGetter('property_name_column')}() == strtoupper(\$propertyName);
+  return \$prop && \$prop->{$this->getPropertyColumnGetter('property_name_column')}() == {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
 }
 
 /**
@@ -450,7 +451,7 @@ protected function isPropertyWithIdA(\$id, \$propertyName, PropelPDO \$con = nul
  */
 protected function setPropertyByNameAndId(\$name, \$value, \$id, PropelPDO \$con = null)
 {
-  if(\$this->isPropertyWithIdA(\$id, strtoupper(\$name), \$con))
+  if(\$this->isPropertyWithIdA(\$id, {$this->peerClassname}::normalizeExtraPropertyName(\$name), \$con))
   {
     return \$this->setPropertyById(\$id, \$value);
   }
@@ -483,7 +484,7 @@ protected function getPropertyById(\$id, \$defaultValue = null, PropelPDO \$con 
  */
 protected function deletePropertyByNameAndId(\$name, \$id, PropelPDO \$con = null)
 {
-  if(\$this->isPropertyWithIdA(\$id, strtoupper(\$name), \$con))
+  if(\$this->isPropertyWithIdA(\$id, {$this->peerClassname}::normalizeExtraPropertyName(\$name), \$con))
   {
     return \$this->deletePropertyById(\$id, \$con);
   }
@@ -557,7 +558,7 @@ public function getRegisteredMultipleProperties()
  */
 public function registerMultipleProperty(\$propertyName, \$defaultValue = null)
 {
-  \$propertyName = strtoupper(\$propertyName);
+  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
   /* comment this line to remove default value update ability
   if(!array_key_exists(\$propertyName, \$this->multipleExtraProperties))
   {
@@ -578,8 +579,8 @@ public function registerMultipleProperty(\$propertyName, \$defaultValue = null)
 public function addProperty(\$propertyName, \$value)
 {
   \$property = new {$this->getPropertyActiveRecordClassName()}();
-  \$property->{$this->getPropertyColumnSetter('property_name_column')}(strtoupper(\$propertyName));
-  \$property->{$this->getPropertyColumnSetter('property_value_column')}(\$value);
+  \$property->{$this->getPropertyColumnSetter('property_name_column')}({$this->peerClassname}::normalizeExtraPropertyName(\$propertyName));
+  \$property->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalizeExtraPropertyValue(\$value));
   \$this->{$this->getPropertyObjectsSetter()}(\$property);
   return \$this;
 }
@@ -621,6 +622,55 @@ public function getPropertiesByName(\$propertyName, \$default = array(), \$id = 
 EOF;
   }
 
+  protected function getGetExtraPropertiesMethods()
+  {
+    return <<<EOF
+/**
+ * returns an associative array with the properties and associated values.
+ *
+ * @return array
+ */
+public function getExtraProperties(\$con = null)
+{
+  \$ret = array();
+
+  // init with default single and multiple properties
+  \$ret = array_merge(\$ret, \$this->extraProperties);
+  foreach (\$this->multipleExtraProperties as \$propertyName => \$default) {
+    \$ret[\$propertyName] = array();
+  }
+
+  foreach (\$this->{$this->getPropertyObjectsGetter()}(null, \$con) as \$property) {
+    \$pname = \$property->{$this->getPropertyColumnGetter('property_name_column')}();
+    \$pvalue = \$property->{$this->getPropertyColumnGetter('property_value_column')}();
+
+    if (array_key_exists(\$pname, \$this->extraProperties)) {
+      // single property
+      \$ret[\$pname] = \$pvalue;
+    }
+    elseif (array_key_exists(\$pname, \$ret) && is_array(\$ret[\$pname])){
+      \$ret[\$pname][] = \$pvalue;
+    }
+    elseif (array_key_exists(\$pname, \$ret)){
+      \$ret[\$pname] = array(\$ret[\$pname], \$pvalue);
+    }
+    else {
+      \$ret[\$pname] = \$pvalue;
+    }
+  }
+
+  // set multiple properties default
+  foreach (\$this->multipleExtraProperties as \$propertyName => \$default) {
+    if (!is_null(\$default) && !count(\$ret[\$propertyName])) {
+      \$ret[\$propertyName][] = \$default;
+    }
+  }
+
+  return \$ret;
+}
+EOF;
+  }
+
   public function objectCall()
   {
     if(floatval(substr(Propel::VERSION,0,3)) >= 1.5)
@@ -638,15 +688,15 @@ EOF;
 // calls the registered properties dedicated functions
 if(in_array(\$methodName = substr({$methodVar}, 0,3), array('add', 'set', 'has', 'get')))
 {
-  \$propertyName = strtoupper(\$this->extraPropertyNameFromMethod(substr({$methodVar}, 3)));
+  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$this->extraPropertyNameFromMethod(substr({$methodVar}, 3)));
 }
 else if(in_array(\$methodName = substr({$methodVar}, 0,5), array('count', 'clear')))
 {
-  \$propertyName = strtoupper(\$this->extraPropertyNameFromMethod(substr({$methodVar}, 5)));
+  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$this->extraPropertyNameFromMethod(substr({$methodVar}, 5)));
 }
 else if(in_array(\$methodName = substr({$methodVar}, 0,6), array('delete', 'update')))
 {
-  \$propertyName = strtoupper(\$this->extraPropertyNameFromMethod(substr({$methodVar}, 6)));
+  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$this->extraPropertyNameFromMethod(substr({$methodVar}, 6)));
 }
 if(isset(\$propertyName))
 {

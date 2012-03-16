@@ -9,18 +9,6 @@
  * @license    MIT License
  */
 
-$_SERVER['PROPEL_DIR'] = dirname(__FILE__) . '/../../../../plugins/sfPropelORMPlugin/lib/vendor/propel/';
-//$_SERVER['PROPEL_DIR'] = '/home/kevin/www/t-resa/plugins/sfPropelORMPlugin/lib/vendor/propel';
-$propel_dir = isset($_SERVER['PROPEL_DIR']) ? $_SERVER['PROPEL_DIR'] : dirname(__FILE__) . '/../../../../../plugins/sfPropelORMPlugin/lib/vendor/propel/';
-$behavior_dir = file_exists(__DIR__ . '/../src/')
-                    ? __DIR__ . '/../src'
-                    : $propel_dir . '/generator/lib/behavior/extra_properties';
-
-require_once $propel_dir . '/runtime/lib/Propel.php';
-require_once $propel_dir . '/generator/lib/util/PropelQuickBuilder.php';
-require_once $propel_dir . '/generator/lib/util/PropelPHPParser.php';
-require_once $propel_dir . '/generator/lib/behavior/versionable/VersionableBehavior.php';
-require_once $behavior_dir . '/ExtraPropertiesBehavior.php';
 
 /**
  * Test for ExtraPropertiesBehavior
@@ -334,5 +322,79 @@ EOF;
     $obj->setProperty('bar', 24, $con); // bar should be updated
     $this->assertEquals(24, $obj->getProperty('bar', $con));
     $this->assertEquals(array(), $obj->getPropertiesByName('biz', array(), null, $con));
+  }
+
+  public function getExtraPropertiesDataProvider()
+  {
+    return array(
+      'test none defined' => array(
+          // property list
+          array(),
+          //expected
+          array(
+            'FOO' => 'default_foo',
+            'BAR' => 'default_bar',
+            'BAZ' => null,
+            'PROP1' => array('default_prop1',),
+            'PROP2' => array('default_prop2',),
+            'PROP3' => array(),
+          ),
+        ),
+      'test property defined' => array(
+          //property list
+          array(
+            array('foo', 'foo'),
+            array('prop3', 'prop3'),
+            array('prop3', 'other prop 3'),
+            array('bar', 'bar'),
+            array('bar', 'new_bar'),
+            array('baz', 'baz'),
+            array('prop2', 'prop2'),
+          ),
+          array(
+            'FOO' => 'foo',
+            'BAR' => 'new_bar',
+            'BAZ' => 'baz',
+            'PROP1' => array('default_prop1',),
+            'PROP2' => array('prop2',),
+            'PROP3' => array('prop3', 'other prop 3'),
+          )
+        )
+    );
+  }
+
+  /**
+   * @dataProvider getExtraPropertiesDataProvider
+   */
+  public function testGetExtraProperties($properties, $expected)
+  {
+    $obj = new ExtraPropertiesBehaviorTest1();
+
+    $obj->registerProperty('foo', 'default_foo');
+    $obj->registerProperty('bar', 'default_bar');
+    $obj->registerProperty('baz');
+
+    $obj->registerMultipleProperty('prop1', 'default_prop1');
+    $obj->registerMultipleProperty('prop2', 'default_prop2');
+    $obj->registerMultipleProperty('prop3');
+
+    foreach ($properties as $prop) {
+      switch ($prop[0]) {
+        case 'foo':
+        case 'bar':
+        case 'baz':
+          $obj->setProperty($prop[0], $prop[1]);
+          break;
+        case 'prop1':
+        case 'prop2':
+        case 'prop3':
+        default:
+          $obj->addProperty($prop[0], $prop[1]);
+          break;
+      }
+    }
+
+    $this->assertInternalType('array', $obj->getExtraProperties());
+    $this->assertEquals($expected, $obj->getExtraProperties());
   }
 }

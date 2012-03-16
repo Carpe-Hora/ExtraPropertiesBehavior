@@ -9,6 +9,7 @@
 
 require_once __DIR__ . '/ExtraPropertiesBehaviorObjectBuilderModifier.php';
 require_once __DIR__ . '/ExtraPropertiesBehaviorQueryBuilderModifier.php';
+require_once __DIR__ . '/ExtraPropertiesBehaviorPeerBuilderModifier.php';
 
 /**
  * @author Julien Muetton <julien_muetton@carpe-hora.com>
@@ -21,7 +22,8 @@ class ExtraPropertiesBehavior extends Behavior
       'properties_table'      => null,
       'property_name_column'  => 'property_name',
       'property_value_column' => 'property_value',
-      'default_properties'    => ''
+      'default_properties'    => '',
+      'normalize'             => 'true'
     );
 
     protected
@@ -162,6 +164,15 @@ class ExtraPropertiesBehavior extends Behavior
      * @param type $parameter
      * @return type
      */
+    public function getPeerBuilderModifier()
+    {
+      if (is_null($this->peerBuilderModifier))
+      {
+        $this->peerBuilderModifier = new ExtraPropertiesBehaviorPeerBuilderModifier($this);
+      }
+      return $this->peerBuilderModifier;
+    }
+
     public function getPropertyColumnForParameter($parameter)
     {
       return $this->propertyTable->getColumn($this->getParameter($parameter));

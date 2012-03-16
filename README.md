@@ -1,6 +1,8 @@
 ExtraPropertiesBehavior
 =======================
 
+[![Build Status](https://secure.travis-ci.org/Carpe-Hora/ExtraPropertiesBehavior.png?branch=master)](http://travis-ci.org/Carpe-Hora/ExtraPropertiesBehavior)
+
 The *ExtraPropertiesBehavior* helps key/value extension for an object.
 
 Basic example
@@ -79,6 +81,10 @@ To do so, declare the extra property list using following :
  * registerProperty
  * registerMultipleProperty
 
+### property extraction methods
+
+ * getExtraProperties: returns an array of properties
+
 Configuration
 -------------
 
@@ -106,6 +112,8 @@ First declare the behavior in the ```schema.xml``` :
       <parameter name="property_name_column" value="key" />
       <!-- property value column -->
       <parameter name="property_value_column" value="value" />
+      <!-- normalize property names and values using peer normalize methods ? -->
+      <parameter name="normalize" value="true" />
     </behavior>
   </table>
 </database>
@@ -142,6 +150,15 @@ $user->registerExtraProperty('MY_MULTIPLE_PREFERENCE');
 $user->addMyMultiplePreference('pref1');
 $user->addMyMultiplePreference('pref2');
 $user->save();
+
+// extract properties
+$user->getExtraProperties();
+// will result in
+// array(
+//   'MY_MODULE_PREFERENCE' => 'preference',
+//   'MY_OTHER_PREFERENCE' => 'preference',
+//   'MY_MULTIPLE_PREFERENCE' => array('pref1', 'pref2'),
+// )
 
 $user->getMyMultiplePreferences();        // will result in array('id_pref1' => 'pref1', 'id_pref2' => 'pref2')
 $user->clearMyMultiplePreferences();      // remove all MY_MULTIPLE_PREFERENCE preferences
