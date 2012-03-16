@@ -12,12 +12,14 @@
  * @return <?php echo $queryClassName . PHP_EOL ?>
  */
 public function filterByExtraPropertyWithDefault($propertyName, $propertyValue, $default)
-{
-  $propertyName = strtoupper($propertyName);
-
+{<?php echo "\n"; if ($shouldNormalize): ?>
+  $propertyName = <?php echo $peerClassName ?>::normalizeExtraPropertyName($propertyName);
+  $propertyValue = <?php echo $peerClassName ?>::normalizeExtraPropertyValue($propertyValue);
+  $default = <?php echo $peerClassName ?>::normalizeExtraPropertyValue($default);
+<?php echo "\n"; endif; ?>
   return $this
-    -><?php echo $joinExtraPropertyTableMethod ?>()
-    ->addJoinCondition('<?php echo $propertyRelationName ?>', '<?php echo $propertyRelationName ?>.<?php echo $propertyPropertyNameColName ?> = ?', $propertyName)
-    ->where("COALESCE(<?php echo $propertyRelationName ?>.<?php echo $propertyPropertyValueColName ?>, '{$default}') = ?", $propertyValue);
+    -><?php echo $joinExtraPropertyTableMethod ?>($joinName = $propertyName . '_' . uniqid())
+    ->addJoinCondition($joinName, "{$joinName}.<?php echo $propertyPropertyNameColName ?> = ?", $propertyName)
+    ->where("COALESCE({$joinName}.<?php echo $propertyPropertyValueColName ?>, '{$default}') = ?", $propertyValue);
 }
 

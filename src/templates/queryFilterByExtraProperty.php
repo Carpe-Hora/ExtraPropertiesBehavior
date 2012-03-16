@@ -9,12 +9,13 @@
  * @return <?php echo $queryClassName . PHP_EOL ?>
  */
 public function filterByExtraProperty($propertyName, $propertyValue)
-{
-  $propertyName = strtoupper($propertyName);
-
+{<?php echo "\n"; if ($shouldNormalize): ?>
+  $propertyName = <?php echo $peerClassName ?>::normalizeExtraPropertyName($propertyName);
+  $propertyValue = <?php echo $peerClassName ?>::normalizeExtraPropertyValue($propertyValue);
+<?php echo "\n"; endif;  ?>
   return $this
-    -><?php echo $joinExtraPropertyTableMethod ?>()
-    ->addJoinCondition('<?php echo $propertyRelationName ?>', '<?php echo $propertyRelationName ?>.<?php echo $propertyPropertyNameColName ?> = ?', $propertyName)
-    ->where('<?php echo $propertyRelationName ?>.<?php echo $propertyPropertyValueColName ?> = ?', $propertyValue);
+    -><?php echo $joinExtraPropertyTableMethod ?>($joinName = $propertyName . '_' . uniqid())
+    ->addJoinCondition($joinName, "{$joinName}.<?php echo $propertyPropertyNameColName ?> = ?", $propertyName)
+    ->where("{$joinName}.<?php echo $propertyPropertyValueColName ?> = ?", $propertyValue);
 }
 

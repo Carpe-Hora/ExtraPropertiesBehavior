@@ -57,9 +57,10 @@ class ExtraPropertiesBehaviorQueryBuilderModifier
   protected function addFilterByExtraProperty($builder)
   {
     return $this->behavior->renderTemplate('queryFilterByExtraProperty', array(
+      'peerClassName' => $this->peerClassname,
+      'shouldNormalize' => 'true' === $this->getParameter('normalize'),
       'queryClassName' => $this->queryClassname,
       'joinExtraPropertyTableMethod' => $this->getJoinExtraPropertyTableMethodName(),
-      'propertyRelationName' => $this->getPropertyTableName(),
       'propertyPropertyNameColName' => $this->getPropertyColumnPhpName('property_name_column'),
       'propertyPropertyValueColName' => $this->getPropertyColumnPhpName('property_value_column'),
     ));
@@ -68,9 +69,10 @@ class ExtraPropertiesBehaviorQueryBuilderModifier
   protected function addFilterByExtraPropertyWithDefault($builder)
   {
     return $this->behavior->renderTemplate('queryFilterByExtraPropertyWithDefault',array(
+      'peerClassName' => $this->peerClassname,
+      'shouldNormalize' => 'true' === $this->getParameter('normalize'),
       'queryClassName' => $this->queryClassname,
       'joinExtraPropertyTableMethod' => $this->getJoinExtraPropertyTableMethodName(),
-      'propertyRelationName' => $this->getPropertyTableName(),
       'propertyPropertyNameColName' => $this->getPropertyColumnPhpName('property_name_column'),
       'propertyPropertyValueColName' => $this->getPropertyColumnPhpName('property_value_column'),
     ));
