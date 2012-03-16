@@ -223,6 +223,100 @@ EOF;
     $this->assertCount(0, $obj->getMyFirstPropertys());
   }
 
+  public function testQueryFilter()
+  {
+    ProductPeer::doDeleteAll();
+
+    $glass = new Product();
+    $glass->setName('Glass');
+    $glass->setProperty('fragile', true);
+    $glass->setProperty('color', 'white');
+    $glass->save();
+
+    $bottle = new Product();
+    $bottle->setName('Bottle');
+    $bottle->setProperty('fragile', true);
+    $bottle->setProperty('color', 'green');
+    $bottle->save();
+
+    $pan = new Product();
+    $pan->setName('Pan');
+    $pan->setProperty('fragile', false);
+    $pan->setProperty('color', 'black');
+    $pan->save();
+
+    $book = new Product();
+    $book->setName('Harry Potter');
+    $book->setProperty('num_pages', 280);
+    $book->setProperty('color', 'green');
+    $book->save();
+
+    $count_all = ProductQuery::create()
+      ->count();
+    $count_fragile = ProductQuery::create()
+      ->filterByExtraProperty('fragile', true)
+      ->count();
+    $count_not_fragile = ProductQuery::create()
+      ->filterByExtraProperty('fragile', false)
+      ->count();
+
+    $count_fragile_with_default_true = ProductQuery::create()
+      ->filterByExtraPropertyWithDefault('fragile', true, true)
+      ->count();
+
+    $count_fragile_with_default_false = ProductQuery::create()
+      ->filterByExtraPropertyWithDefault('fragile', true, false)
+      ->count();
+
+    $this->assertSame(4, $count_all);
+    $this->assertSame(2, $count_fragile);
+    $this->assertSame(1, $count_not_fragile);
+    $this->assertSame(3, $count_fragile_with_default_true);
+    $this->assertSame(2, $count_fragile_with_default_false);
+
+    $count_on_multiple_1 = ProductQuery::create()
+      ->filterByExtraProperty('fragile', true)
+      ->filterByExtraProperty('color', 'green')
+      ->count();
+    $count_on_multiple_2 = ProductQuery::create()
+      ->filterByExtraProperty('fragile', false)
+      ->filterByExtraProperty('color', 'green')
+      ->count();
+
+    $this->assertSame(1, $count_on_multiple_1);
+    $this->assertSame(0, $count_on_multiple_2);
+  }
+
+  public function testQueryFilterCalledMultipleTimes()
+  {
+    $count_on_multiple_1 = ProductQuery::create()
+      ->filterByExtraProperty('fragile', true)
+      ->filterByExtraProperty('color', 'green')
+      ->count();
+    $count_on_multiple_2 = ProductQuery::create()
+      ->filterByExtraProperty('fragile', false)
+      ->filterByExtraProperty('color', 'green')
+      ->count();
+
+    $this->assertSame(1, $count_on_multiple_1);
+    $this->assertSame(0, $count_on_multiple_2);
+
+
+    $count_on_multiple_3 = ProductQuery::create()
+      ->filterByExtraPropertyWithDefault('fragile', false, true)
+      ->filterByExtraProperty('color', 'green')
+      ->count();
+    $count_on_multiple_4 = ProductQuery::create()
+      ->filterByExtraPropertyWithDefault('fragile', false, false)
+      ->filterByExtraProperty('color', 'green')
+      ->count();
+
+    $this->assertSame(0, $count_on_multiple_3);
+    $this->assertSame(1, $count_on_multiple_4);
+  }
+
+
+
   public function testUseExistingPropertiesTable()
   {
     $user = new User();

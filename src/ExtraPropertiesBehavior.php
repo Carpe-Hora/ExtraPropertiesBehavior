@@ -8,6 +8,7 @@
  */
 
 require_once __DIR__ . '/ExtraPropertiesBehaviorObjectBuilderModifier.php';
+require_once __DIR__ . '/ExtraPropertiesBehaviorQueryBuilderModifier.php';
 require_once __DIR__ . '/ExtraPropertiesBehaviorPeerBuilderModifier.php';
 
 /**
@@ -149,6 +150,20 @@ class ExtraPropertiesBehavior extends Behavior
       return $this->objectBuilderModifier;
     }
 
+    public function getQueryBuilderModifier()
+    {
+      if (is_null($this->queryBuilderModifier))
+      {
+        $this->queryBuilderModifier = new ExtraPropertiesBehaviorQueryBuilderModifier($this);
+      }
+      return $this->queryBuilderModifier;
+    }
+
+    /**
+     *
+     * @param type $parameter
+     * @return type
+     */
     public function getPeerBuilderModifier()
     {
       if (is_null($this->peerBuilderModifier))
