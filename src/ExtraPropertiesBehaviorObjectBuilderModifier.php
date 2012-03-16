@@ -121,6 +121,7 @@ class ExtraPropertiesBehaviorObjectBuilderModifier
     $script .= $this->getInitializePropertiesMethod();
     $script .= $this->getSinglePropertyRegistrationMethods();
     $script .= $this->getMultiplePropertyRegistrationMethods();
+    $script .= $this->getGetExtraPropertiesMethods();
     return $script;
   }
 
@@ -618,6 +619,55 @@ public function getPropertiesByName(\$propertyName, \$default = array(), \$id = 
   return \$ret;
 }
 
+EOF;
+  }
+
+  protected function getGetExtraPropertiesMethods()
+  {
+    return <<<EOF
+/**
+ * returns an associative array with the properties and associated values.
+ *
+ * @return array
+ */
+public function getExtraProperties(\$con = null)
+{
+  \$ret = array();
+
+  // init with default single and multiple properties
+  \$ret = array_merge(\$ret, \$this->extraProperties);
+  foreach (\$this->multipleExtraProperties as \$propertyName => \$default) {
+    \$ret[\$propertyName] = array();
+  }
+
+  foreach (\$this->{$this->getPropertyObjectsGetter()}(null, \$con) as \$property) {
+    \$pname = \$property->{$this->getPropertyColumnGetter('property_name_column')}();
+    \$pvalue = \$property->{$this->getPropertyColumnGetter('property_value_column')}();
+
+    if (array_key_exists(\$pname, \$this->extraProperties)) {
+      // single property
+      \$ret[\$pname] = \$pvalue;
+    }
+    elseif (array_key_exists(\$pname, \$ret) && is_array(\$ret[\$pname])){
+      \$ret[\$pname][] = \$pvalue;
+    }
+    elseif (array_key_exists(\$pname, \$ret)){
+      \$ret[\$pname] = array(\$ret[\$pname], \$pvalue);
+    }
+    else {
+      \$ret[\$pname] = \$pvalue;
+    }
+  }
+
+  // set multiple properties default
+  foreach (\$this->multipleExtraProperties as \$propertyName => \$default) {
+    if (!is_null(\$default) && !count(\$ret[\$propertyName])) {
+      \$ret[\$propertyName][] = \$default;
+    }
+  }
+
+  return \$ret;
+}
 EOF;
   }
 
