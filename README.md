@@ -3,12 +3,12 @@ ExtraPropertiesBehavior
 
 [![Build Status](https://secure.travis-ci.org/Carpe-Hora/ExtraPropertiesBehavior.png?branch=master)](http://travis-ci.org/Carpe-Hora/ExtraPropertiesBehavior)
 
-The *ExtraPropertiesBehavior* helps key/value extension for an object.
+The *ExtraPropertiesBehavior* provides a key/value extension for an object.
 
 Basic example
 -------------
 
-Given a product, *ExtraPropertiesBehavior* add key/value extension.
+Given a product model, *ExtraPropertiesBehavior* will add a key/value extension interface.
 
 ``` xml
 <table name="product">
@@ -33,13 +33,14 @@ $tvSet->getProperty('frequency'); // will result in 'frequency'
 Installation
 ------------
 
-First clone the behavior in your vendor directory
+First clone the behavior in your vendor directory:
 
 ```
 git clone git://github.com/Carpe-Hora/ExtraPropertiesBehavior.git
 ```
 
-then register behavior in your ```propel.ini``` or ```buid.properties``` configuration files :
+Then register behavior in either your ```propel.ini``` or ```buid.properties```
+configuration file:
 
 ``` ini
 propel.behavior.extra_properties.class = path.to.ExtraPropertiesBehavior
@@ -48,47 +49,52 @@ propel.behavior.extra_properties.class = path.to.ExtraPropertiesBehavior
 Usage
 -----
 
-Just declare the behavior in your table definition :
+Just add the behavior to your table definition:
 
 ``` xml
 <!-- in schema.xml -->
-<behavior name="extra_properties" />
+<table name="product">
+  <!-- ... -->
+
+  <behavior name="extra_properties" />
+</table>
 ```
 
-At this point behavior will add an extra table to store properties and a set of methods in the active 
-record object :
+At this point the behavior will create an extra table to store properties and
+will add the following set of methods in the active
+record object:
 
 ### Common methods
 
- * hasProperty('property_name')
- * countPropertiesByName('property_name')
- * initializeProperties()
- * deletePropertiesByName('property_name')
+ * `hasProperty('property_name')`
+ * `countPropertiesByName('property_name')`
+ * `initializeProperties()`
+ * `deletePropertiesByName('property_name')`
 
 ### Single instance properties
 
- * setProperty('property_name', 'value')
- * getProperty('property_name', 'default value')
+ * `setProperty('property_name', 'value')`
+ * `getProperty('property_name', 'default value')`
 
 ### multiple instance properties
 
- * addProperty('property_name', 'value')
- * getPropertiesByName('property_name')
+ * `addProperty('property_name', 'value')`
+ * `getPropertiesByName('property_name')`
 
-This is nice, but usualy, what a developper want is direct access through getters and setters.
-To do so, declare the extra property list using following :
+This is nice, but usualy what a developer wants is direct access through getters and setters.
+To do so, declare an extra properties list using the following methods:
 
- * registerProperty
- * registerMultipleProperty
+ * `registerProperty('property_name, 'default value')`
+ * `registerMultipleProperty('property_name')`
 
 ### property extraction methods
 
- * getExtraProperties: returns an array of properties
+ * `getExtraProperties()` returns an array of properties
 
 Configuration
 -------------
 
-First declare the behavior in the ```schema.xml``` :
+First declare the behavior in your ```schema.xml```:
 
 ``` xml
 <database name="user">
@@ -119,24 +125,24 @@ First declare the behavior in the ```schema.xml``` :
 </database>
 ```
 
-To enable humanized getters, you can declare properties during your initilization boot or anywhere else...
+To enable humanized getters, declare an `initializeProperties()` method in your model like this:
 
 ``` php
 <?php
 class User extends BaseUser
 {
-  protected function initialize()
+  protected function initializeProperties()
   {
     $this->registerExtraProperty('MY_MODULE_PREFERENCE', 'default_value');
   }
 }
 ```
 
-Then, anywhere just access preferences as follow :
+Then you can use getters and setters directly with your model object:
 
 ``` php
 <?php
-// built in extension
+// get/set methods created by initializeProperties()
 $user->getMyModulePreference();             // or call $user->getProperty('my_module_preference');
 $user->setMyModulePreference('preference'); // or call $user->setProperty('my_module_preference', 'preference');
 
@@ -171,7 +177,7 @@ Use with single inheritance
 It sometimes is useful to be able to extend the model depending on the inheritance classkey.
 *ExtraPropertiesBehavior* can do that for you.
 
-Imagine a CMS with several content types :
+Imagine a CMS with several content types:
 
 ``` xml
 <database name="content">
@@ -184,8 +190,8 @@ Imagine a CMS with several content types :
 </database>
 ```
 
-Given the default content structure, just define your contents by defining your possible key/values in the 
-initializeProperties method:
+Given the default content structure, just define your content options by defining your possible key/values in the
+`initializeProperties()` method:
 
 ``` php
 <?php
@@ -223,7 +229,7 @@ class Video extends Content
 }
 ```
 
-Then, just use extra properties as if it where built in fields :
+Then, just use extra properties as if it where built in fields:
 
 ``` php
 <?php
@@ -244,5 +250,5 @@ Todo
 
  * implement default properties (generate methods and register in initialize)
  * parameter to chose setters and getters name.
- * add a calback to convert property value
+ * add a callback to convert property value
  * add namespace
