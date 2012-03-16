@@ -116,7 +116,7 @@ First declare the behavior in the ```schema.xml``` :
       <!-- property value column -->
       <parameter name="property_value_column" value="value" />
       <!-- normalize property names and values using peer normalize methods ? -->
-      <parameter name="property_value_column" value="true" />
+      <parameter name="normalize" value="true" />
     </behavior>
   </table>
 </database>
