@@ -41,6 +41,7 @@ class ExtraPropertiesBehaviorPeerBuilderModifier
  */
 static function normalizeExtraPropertyName(\$propertyName)
 {
+
 EOF;
     if ($this->shouldNormalize()) {
       $script .= <<<EOF
@@ -52,6 +53,7 @@ EOF;
 EOF;
     }
     $script .= <<<EOF
+
 }
 
 /**
