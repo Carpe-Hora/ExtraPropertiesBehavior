@@ -27,7 +27,7 @@ $tvSet->setProperty('frequency', '11 Hz');
 $tvSet->save();
 
 $tvSet->getProperty('size'); // will result in '12 inches'
-$tvSet->getProperty('frequency'); // will result in 'frequency'
+$tvSet->getProperty('frequency'); // will result in '11 Hz'
 ```
 
 Installation
