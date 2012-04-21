@@ -1,5 +1,5 @@
 {
-  "name": "CarpeHora/ExtraPropertiesBehavior",
+  "name": "carpehora/propel-extraproperties-behavior",
   "description": "ExtraPropertiesBehavior is a propel behavior to store key/value extra fields in a propel model.",
   "keywords": ["Propel", "Behavior", "ExtraProperties", "Key value"],
   "homepage": "http://carpe-hora.github.com/ExtraPropertiesBehavior/",
