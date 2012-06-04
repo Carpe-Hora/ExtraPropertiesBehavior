@@ -684,7 +684,7 @@ EOF;
       $paramVar = '$arguments';
     }
 
-    return <<<EOF
+    $script = <<<EOF
 // calls the registered properties dedicated functions
 if(in_array(\$methodName = substr({$methodVar}, 0,3), array('add', 'set', 'has', 'get')))
 {
@@ -755,12 +755,20 @@ if(isset(\$propertyName))
         break;
     }
   }
-  //* no error throw to make sure other behaviors can be called.
-  else
-  {
-    throw new RuntimeException(sprintf('Unknown property %s.<br />possible single properties: %s<br />possible multiple properties', \$propertyName, join(',', array_keys(\$this->extraProperties)), join(',', array_keys(\$this->multipleExtraProperties))));
-  }
-  //*/
+
+EOF;
+    if ('true' === $this->getParameter('throw_error')) {
+      $script .= <<<EOF
+    //* no error throw to make sure other behaviors can be called.
+    else
+    {
+      throw new RuntimeException(sprintf('Unknown property %s.<br />possible single properties: %s<br />possible multiple properties', \$propertyName, join(',', array_keys(\$this->extraProperties)), join(',', array_keys(\$this->multipleExtraProperties))));
+    }
+    //*/
+
+EOF;
+    }
+    $script .= <<<EOF
   if(isset(\$callable))
   {
     array_unshift({$paramVar}, \$propertyName);
@@ -768,7 +776,9 @@ if(isset(\$propertyName))
   }
 
 }
+
 EOF
     ;
+    return $script;
   }
 } // END OF ExtraPropertiesBehaviorObjectBuilderModifier

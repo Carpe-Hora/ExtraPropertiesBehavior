@@ -120,6 +120,8 @@ First declare the behavior in your ```schema.xml```:
       <parameter name="property_value_column" value="value" />
       <!-- normalize property names and values using peer normalize methods ? -->
       <parameter name="normalize" value="true" />
+      <!-- throw an error if shortcut get{PropertyName} cannot resole PropertyName ? -->
+      <parameter name="throw_error" value="true" />
     </behavior>
   </table>
 </database>

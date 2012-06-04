@@ -23,7 +23,8 @@ class ExtraPropertiesBehavior extends Behavior
       'property_name_column'  => 'property_name',
       'property_value_column' => 'property_value',
       'default_properties'    => '',
-      'normalize'             => 'true'
+      'normalize'             => 'true',
+      'throw_error'           => 'true'
     );
 
     protected
