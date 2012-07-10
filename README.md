@@ -46,6 +46,13 @@ configuration file:
 propel.behavior.extra_properties.class = path.to.ExtraPropertiesBehavior
 ```
 
+For Symfony2 only, in your project composer.json (don't forget to edit the path) :
+``` json
+"autoload": {
+  "classmap": ["path/to/propel/generator/lib/util/PropelPHPParser.php"]
+}
+```
+
 Usage
 -----
 
