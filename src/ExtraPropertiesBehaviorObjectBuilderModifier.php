@@ -28,6 +28,9 @@ class ExtraPropertiesBehaviorObjectBuilderModifier
 		$this->objectClassname = $builder->getStubObjectBuilder()->getClassname();
 		$this->queryClassname = $builder->getStubQueryBuilder()->getClassname();
 		$this->peerClassname = $builder->getStubPeerBuilder()->getClassname();
+		
+		// Add namespace for PHP >= 5.3
+		$builder->declareClass('RuntimeException');
 	}
 
   protected function getParameter($key)
