@@ -39,6 +39,16 @@ First clone the behavior in your vendor directory:
 git clone git://github.com/Carpe-Hora/ExtraPropertiesBehavior.git
 ```
 
+Or using Composer:
+
+```json
+{
+    "require": {
+        "carpehora/propel-extraproperties-behavior": "1.*"
+    }
+}
+```
+
 Then register behavior in either your ```propel.ini``` or ```buid.properties```
 configuration file:
 
