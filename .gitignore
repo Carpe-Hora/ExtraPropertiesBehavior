@@ -2,3 +2,6 @@ _layouts
 _posts
 
 phpunit.xml
+vendor
+composer.phar
+composer.lock
