@@ -135,7 +135,7 @@ class User extends BaseUser
 {
   protected function initializeProperties()
   {
-    $this->registerExtraProperty('MY_MODULE_PREFERENCE', 'default_value');
+    $this->registerProperty('MY_MODULE_PREFERENCE', 'default_value');
   }
 }
 ```
@@ -149,12 +149,12 @@ $user->getMyModulePreference();             // or call $user->getProperty('my_mo
 $user->setMyModulePreference('preference'); // or call $user->setProperty('my_module_preference', 'preference');
 
 // extend dynamicly
-$user->registerExtraProperty('MY_OTHER_PREFERENCE', 'default_value');
+$user->registerProperty('MY_OTHER_PREFERENCE', 'default_value');
 $user->getMyOtherPreference();             // or call $user->getProperty('my_other_preference');
 $user->setMyOtherPreference('preference'); // or call $user->setProperty('my_other_preference', 'preference');
 
 // simply deal with multiple occurences
-$user->registerExtraProperty('MY_MULTIPLE_PREFERENCE');
+$user->registerProperty('MY_MULTIPLE_PREFERENCE');
 $user->addMyMultiplePreference('pref1');
 $user->addMyMultiplePreference('pref2');
 $user->save();
@@ -201,8 +201,8 @@ class Article extends Content
 {
   protected function initializeProperties()
   {
-    $this->registerExtraProperty('CONTENT');
-    $this->registerExtraProperty('AUTHOR');
+    $this->registerProperty('CONTENT');
+    $this->registerProperty('AUTHOR');
   }
 
   public function getOMClass()
@@ -220,8 +220,8 @@ class Video extends Content
 {
   protected function initializeProperties()
   {
-    $this->registerExtraProperty('URL');
-    $this->registerExtraProperty('LENGTH');
+    $this->registerProperty('URL');
+    $this->registerProperty('LENGTH');
   }
 
   public function getOMClass()
