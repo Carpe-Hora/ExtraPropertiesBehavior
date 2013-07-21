@@ -1,14 +1,13 @@
 <?php
 
-$propel_dir = $_SERVER['PROPEL_DIR'];
-
-$behavior_dir = file_exists(__DIR__ . '/../src/')
-                    ? __DIR__ . '/../src'
-                    : $propel_dir . '/generator/lib/behavior/extra_properties';
-
-require_once $propel_dir . '/runtime/lib/Propel.php';
-require_once $propel_dir . '/generator/lib/util/PropelQuickBuilder.php';
-require_once $propel_dir . '/generator/lib/util/PropelPHPParser.php';
-require_once $propel_dir . '/generator/lib/behavior/versionable/VersionableBehavior.php';
-require_once $behavior_dir . '/ExtraPropertiesBehavior.php';
-
+if (!($loader = @include __DIR__ . '/../vendor/autoload.php')) {
+        exit(<<<EOT
+You need to install the project dependencies using Composer:
+$ wget http://getcomposer.org/composer.phar
+OR
+$ curl -s https://getcomposer.org/installer | php
+$ php composer.phar install --dev
+$ phpunit
+EOT
+            );
+}

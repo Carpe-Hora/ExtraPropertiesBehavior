@@ -336,6 +336,7 @@ EOF;
   {
     $beagle = new Product();
     $beagle->setName('Beagle');
+    $beagle->save();
     $this->assertSame($beagle, $beagle->setProperty('color', 'brown'));
     $this->assertSame($beagle, $beagle->addProperty('length', '27.5m'));
     $this->assertCount(2, $beagle->getProductExtraPropertys());

@@ -3,16 +3,10 @@ language: php
 php:
   - 5.3
   - 5.4
+  - 5.5
 
 before_script:
-
-  # phing
-  - pyrus channel-discover pear.phing.info
-  - pyrus install phing/phing
-
-  # Composer
   - wget http://getcomposer.org/composer.phar
-  - php composer.phar install
-  - cat phpunit.xml.dist | sed -e "s:YOUR_PROPEL_PATH:$(pwd)/vendor/propel/propel1:" > phpunit.xml
+  - php composer.phar install --dev
 
 script: phpunit
