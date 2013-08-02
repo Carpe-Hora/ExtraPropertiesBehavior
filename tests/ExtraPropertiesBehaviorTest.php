@@ -450,4 +450,31 @@ EOF;
     $this->assertInternalType('array', $obj->getExtraProperties());
     $this->assertEquals($expected, $obj->getExtraProperties());
   }
+
+  public function testPredefinedPhpNameCollision() {
+
+    if (!class_exists('Price')) {
+      $schema = <<<EOF
+      <database name="store">
+        <table name="price">
+          <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoincrement="true" />
+          <column name="price" type="NUMERIC" size="10" precision="2" />
+          <behavior name="extra_properties" />
+        </table>
+      </database>
+EOF;
+
+    ob_start();
+    
+    PropelQuickBuilder::debugClassesForTable($schema, 'price_extra_property');
+
+    $debugContent = ob_get_contents();
+
+    ob_end_clean();
+    
+    $this->assertEquals(1, substr_count($debugContent, 'function getId('));
+
+    }
+
+  }
 }

@@ -123,6 +123,7 @@ class ExtraPropertiesBehavior extends Behavior
         foreach ($table->getPrimaryKey() as $key => $column) {
           $ref_column = $column->getAttributes();
           $ref_column['name'] = sprintf('%s_%s', $table->getName(), $ref_column['name']);
+          $ref_column['phpName'] = null;
           $ref_column['required'] = 'true';
           $ref_column['primaryKey'] = 'false';
           $ref_column['autoIncrement'] = 'false';
