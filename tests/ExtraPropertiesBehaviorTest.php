@@ -465,7 +465,7 @@ EOF;
 EOF;
 
     ob_start();
-    
+
     PropelQuickBuilder::debugClassesForTable($schema, 'price_extra_property');
 
     $debugContent = ob_get_contents();
@@ -474,6 +474,21 @@ EOF;
     
     $this->assertEquals(1, substr_count($debugContent, 'function getId('));
 
+    }
+
+  }
+
+  public function testTableNameSingulizer() {
+
+    $testcases = array(
+      'prices' => 'price',
+      'product_prices' => 'product_price',
+      'product_customer_prices' => 'product_customer_price',
+      'product_customers_prices' => 'product_customers_price'
+      );
+
+    foreach($testcases as $key => $value) {
+      $this->assertEquals($value, ExtraPropertiesBehavior::getSingularizedTableName($key));
     }
 
   }
