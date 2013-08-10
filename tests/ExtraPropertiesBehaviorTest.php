@@ -450,4 +450,48 @@ EOF;
     $this->assertInternalType('array', $obj->getExtraProperties());
     $this->assertEquals($expected, $obj->getExtraProperties());
   }
+
+  public function testPredefinedPhpNameCollision() {
+
+    if (!class_exists('Price')) {
+      $schema = <<<EOF
+      <database name="store">
+        <table name="price">
+          <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoincrement="true" />
+          <column name="price" type="NUMERIC" size="10" precision="2" />
+          <behavior name="extra_properties" />
+        </table>
+      </database>
+EOF;
+
+    ob_start();
+
+    PropelQuickBuilder::debugClassesForTable($schema, 'price_extra_property');
+
+    $debugContent = ob_get_contents();
+
+    ob_end_clean();
+    
+    $this->assertEquals(1, substr_count($debugContent, 'function getId('));
+
+    }
+
+  }
+
+  public function testTableNameSingulizer() {
+
+    $testcases = array(
+      'prices' => 'price',
+      'product_prices' => 'product_price',
+      'product_customer_prices' => 'product_customer_price',
+      'product_customers_prices' => 'product_customers_price'
+      );
+
+    $behavior = new ExtraPropertiesBehavior();
+
+    foreach($testcases as $key => $value) {
+      $this->assertEquals($value, $behavior->getSingularizedTableName($key));
+    }
+
+  }
 }

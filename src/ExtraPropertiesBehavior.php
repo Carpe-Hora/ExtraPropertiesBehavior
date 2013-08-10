@@ -10,6 +10,7 @@
 require_once __DIR__ . '/ExtraPropertiesBehaviorObjectBuilderModifier.php';
 require_once __DIR__ . '/ExtraPropertiesBehaviorQueryBuilderModifier.php';
 require_once __DIR__ . '/ExtraPropertiesBehaviorPeerBuilderModifier.php';
+require_once dirname(__DIR__) . '/vendor/doctrine/inflector/lib/Doctrine/Common/Inflector/Inflector.php';
 
 /**
  * @author Julien Muetton <julien_muetton@carpe-hora.com>
@@ -31,7 +32,18 @@ class ExtraPropertiesBehavior extends Behavior
       $propertyTable,
       $objectBuilderModifier,
       $queryBuilderModifier,
-      $peerBuilderModifier;
+      $peerBuilderModifier,
+      $inflector;
+
+    //setter for inflector dependency
+    public function setInflector($inflector) {
+        $this->inflector = $inflector;
+    }
+
+    //getter for inflector dependency with default value
+    public function getInflector() {
+        return $this->inflector ?: 'Doctrine\\Common\\Inflector\\Inflector';
+    }
 
     public function modifyDatabase()
     {
@@ -120,9 +132,13 @@ class ExtraPropertiesBehavior extends Behavior
         $fk->setOnDelete('CASCADE');
         $fk->setOnUpdate(null);
         $tablePKs = $table->getPrimaryKey();
+        $tableName = $table->getName();
         foreach ($table->getPrimaryKey() as $key => $column) {
           $ref_column = $column->getAttributes();
-          $ref_column['name'] = sprintf('%s_%s', $table->getName(), $ref_column['name']);
+          $ref_column['name'] = sprintf('%s_%s', $this->getSingularizedTableName($tableName), $ref_column['name']);
+          //reset copied value for phpName to force regeneration 
+          //of phpName since "name" has (probably) also changed
+          $ref_column['phpName'] = null;
           $ref_column['required'] = 'true';
           $ref_column['primaryKey'] = 'false';
           $ref_column['autoIncrement'] = 'false';
@@ -130,6 +146,18 @@ class ExtraPropertiesBehavior extends Behavior
           $fk->addReference($ref_column, $column);
         }
         $this->propertyTable->addForeignKey($fk);
+    }
+
+    public function getSingularizedTableName($name) {
+
+        $inflector = $this->getInflector();
+        $nameChunks = explode('_', $name);
+        $endChunk = array_pop($nameChunks);
+
+        array_push($nameChunks, $inflector::singularize($endChunk));
+        
+        return implode('_',$nameChunks);
+
     }
 
     public function getPropertyTable()
