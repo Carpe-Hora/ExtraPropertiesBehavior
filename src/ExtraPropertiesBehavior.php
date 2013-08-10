@@ -10,9 +10,7 @@
 require_once __DIR__ . '/ExtraPropertiesBehaviorObjectBuilderModifier.php';
 require_once __DIR__ . '/ExtraPropertiesBehaviorQueryBuilderModifier.php';
 require_once __DIR__ . '/ExtraPropertiesBehaviorPeerBuilderModifier.php';
-require_once dirname(__DIR__) . 'vendor/doctrine/inflector/lib/Doctrine/Common/Inflector/Inflector.php';
-
-use Doctrine\Common\Inflector\Inflector;
+require_once dirname(__DIR__) . '/vendor/doctrine/inflector/lib/Doctrine/Common/Inflector/Inflector.php';
 
 /**
  * @author Julien Muetton <julien_muetton@carpe-hora.com>
@@ -44,7 +42,7 @@ class ExtraPropertiesBehavior extends Behavior
 
     //getter for inflector dependency with default value
     public function getInflector() {
-        return $this->inflector ?: 'Inflector';
+        return $this->inflector ?: 'Doctrine\\Common\\Inflector\\Inflector';
     }
 
     public function modifyDatabase()

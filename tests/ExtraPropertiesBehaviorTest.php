@@ -487,8 +487,10 @@ EOF;
       'product_customers_prices' => 'product_customers_price'
       );
 
+    $behavior = new ExtraPropertiesBehavior();
+
     foreach($testcases as $key => $value) {
-      $this->assertEquals($value, ExtraPropertiesBehavior::getSingularizedTableName($key));
+      $this->assertEquals($value, $behavior->getSingularizedTableName($key));
     }
 
   }
