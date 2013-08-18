@@ -68,6 +68,12 @@ class ExtraPropertiesBehavior extends Behavior
             return;
         }
 
+        // remove the table prefix from the table name as Propel will
+        // automatically add it
+        if (strpos($propertyTableName, $database->getTablePrefix()) === 0) {
+            $propertyTableName = substr($propertyTableName, strlen($database->getTablePrefix()));
+        }
+
         $propertyTable = $database->addTable(array(
             'name'      => $propertyTableName,
             'phpName'   => $this->getPropertyTableName(),
