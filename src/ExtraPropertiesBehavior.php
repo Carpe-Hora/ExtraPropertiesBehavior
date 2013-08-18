@@ -121,16 +121,25 @@ class ExtraPropertiesBehavior extends Behavior
         $fk->setForeignSchemaName($table->getSchema());
         $fk->setOnDelete('CASCADE');
         $fk->setOnUpdate(null);
+
         $tablePKs = $table->getPrimaryKey();
+        $tableName = $table->getName();
+
         foreach ($table->getPrimaryKey() as $key => $column) {
             $ref_column = $column->getAttributes();
             $ref_column['name'] = sprintf('%s_%s', $table->getName(), $ref_column['name']);
             $ref_column['required'] = 'true';
             $ref_column['primaryKey'] = 'false';
             $ref_column['autoIncrement'] = 'false';
+
+            // force Propel to regenerate the phpName for this column
+            // @see https://github.com/Carpe-Hora/ExtraPropertiesBehavior/pull/11
+            $ref_column['phpName'] = null;
+
             $ref_column = $this->propertyTable->addColumn($ref_column);
             $fk->addReference($ref_column, $column);
         }
+
         $this->propertyTable->addForeignKey($fk);
     }
 
