@@ -14,127 +14,126 @@
  */
 class ExtraPropertiesBehaviorObjectBuilderModifier
 {
-  protected $behavior, $table, $builder, $objectClassname, $peerClassname;
+    protected $behavior, $table, $builder, $objectClassname, $peerClassname;
 
-  public function __construct($behavior)
-  {
-    $this->behavior = $behavior;
-    $this->table = $behavior->getTable();
-  }
-
-	protected function setBuilder($builder)
-	{
-		$this->builder = $builder;
-		$this->objectClassname = $builder->getStubObjectBuilder()->getClassname();
-		$this->queryClassname = $builder->getStubQueryBuilder()->getClassname();
-		$this->peerClassname = $builder->getStubPeerBuilder()->getClassname();
-		
-		// Add namespace for PHP >= 5.3
-		$builder->declareClass('RuntimeException');
-	}
-
-  protected function getParameter($key)
-  {
-    return $this->behavior->getParameter($key);
-  }
-
-  protected function getPropertyColumnPhpName($name = 'property_name_column')
-  {
-    return $this->behavior->getPropertyColumnForParameter($name)->getPhpName();
-  }
-
-  /**
-   * Get the getter of the column of the behavior
-   *
-   * @return string The related getter, e.g. 'getVersion'
-   */
-  protected function getPropertyColumnGetter($name = 'property_name_column')
-  {
-    return 'get' . $this->getPropertyColumnPhpName($name);
-  }
-
-  /**
-   * Get the setter of the column of the behavior
-   *
-   * @return string The related setter, e.g. 'setVersion'
-   */
-  protected function getPropertyColumnSetter($name = 'property_name_column')
-  {
-    return 'set' . $this->getPropertyColumnPhpName($name);
-  }
-
-  protected function getPropertyObjectsColumn()
-  {
-		$propertyTable = $this->behavior->getPropertyTable();
-		$propertyARClassname = $this->builder->getNewStubObjectBuilder($propertyTable)->getClassname();
-		$fks = $propertyTable->getForeignKeysReferencingTable($this->table->getName());
-		$relCol = $this->builder->getRefFKPhpNameAffix($fks[0], $plural = true);
-    return sprintf('coll%s', ucfirst($relCol));
-  }
-
-  protected function getPropertyObjectsGetter()
-  {
-		$propertyTable = $this->behavior->getPropertyTable();
-		$propertyARClassname = $this->builder->getNewStubObjectBuilder($propertyTable)->getClassname();
-		$fks = $propertyTable->getForeignKeysReferencingTable($this->table->getName());
-		$relCol = $this->builder->getRefFKPhpNameAffix($fks[0], $plural = true);
-    return sprintf('get%s', ucfirst($relCol));
-  }
-
-  protected function getPropertyObjectsSetter()
-  {
-		$propertyTable = $this->behavior->getPropertyTable();
-		$propertyARClassname = $this->builder->getNewStubObjectBuilder($propertyTable)->getClassname();
-		$fks = $propertyTable->getForeignKeysReferencingTable($this->table->getName());
-		$relCol = $this->builder->getRefFKPhpNameAffix($fks[0], $plural = false);
-    return sprintf('add%s', ucfirst($relCol));
-  }
-
-  protected function getPropertyTableName()
-  {
-		$propertyTable = $this->behavior->getPropertyTable();
-		$propertyARClassname = $this->builder->getNewStubObjectBuilder($propertyTable)->getClassname();
-    return $propertyARClassname;
-  }
-
-  protected function getPropertyActiveRecordClassName()
-  {
-		$propertyTable = $this->behavior->getPropertyTable();
-		$propertyARClassname = $this->builder->getNewStubObjectBuilder($propertyTable)->getClassname();
-    return $propertyARClassname;
-  }
-
-	protected function getActiveRecordClassName()
-	{
-		return $this->builder->getStubObjectBuilder()->getClassname();
-	}
-
-  public function objectAttributes($builder)
-  {
-    $script = $this->getSinglePropertyScript();
-    $script .= $this->getMultiplePropertyScript();
-
-    return $script;
-  }
-
-  public function objectMethods($builder)
-  {
-		$this->setBuilder($builder);
-    $script = $this->getCommonPropertyMethods();
-    $script .= $this->getInitializePropertiesMethod();
-    $script .= $this->getSinglePropertyRegistrationMethods();
-    $script .= $this->getMultiplePropertyRegistrationMethods();
-    $script .= $this->getGetExtraPropertiesMethods();
-    return $script;
-  }
-
-  public function objectFilter(&$script)
-  {
-    $parser = new PropelPHPParser($script, true);
-    $construct = $parser->findMethod('__construct');
-    if (!strlen($construct))
+    public function __construct($behavior)
     {
-      $construct = <<<EOF
+        $this->behavior = $behavior;
+        $this->table = $behavior->getTable();
+    }
+
+    protected function setBuilder($builder)
+    {
+        $this->builder = $builder;
+        $this->objectClassname = $builder->getStubObjectBuilder()->getClassname();
+        $this->queryClassname = $builder->getStubQueryBuilder()->getClassname();
+        $this->peerClassname = $builder->getStubPeerBuilder()->getClassname();
+
+        // Add namespace for PHP >= 5.3
+        $builder->declareClass('RuntimeException');
+    }
+
+    protected function getParameter($key)
+    {
+        return $this->behavior->getParameter($key);
+    }
+
+    protected function getPropertyColumnPhpName($name = 'property_name_column')
+    {
+        return $this->behavior->getPropertyColumnForParameter($name)->getPhpName();
+    }
+
+    /**
+     * Get the getter of the column of the behavior
+     *
+     * @return string The related getter, e.g. 'getVersion'
+     */
+    protected function getPropertyColumnGetter($name = 'property_name_column')
+    {
+        return 'get' . $this->getPropertyColumnPhpName($name);
+    }
+
+    /**
+     * Get the setter of the column of the behavior
+     *
+     * @return string The related setter, e.g. 'setVersion'
+     */
+    protected function getPropertyColumnSetter($name = 'property_name_column')
+    {
+        return 'set' . $this->getPropertyColumnPhpName($name);
+    }
+
+    protected function getPropertyObjectsColumn()
+    {
+        $propertyTable = $this->behavior->getPropertyTable();
+        $propertyARClassname = $this->builder->getNewStubObjectBuilder($propertyTable)->getClassname();
+        $fks = $propertyTable->getForeignKeysReferencingTable($this->table->getName());
+        $relCol = $this->builder->getRefFKPhpNameAffix($fks[0], $plural = true);
+        return sprintf('coll%s', ucfirst($relCol));
+    }
+
+    protected function getPropertyObjectsGetter()
+    {
+        $propertyTable = $this->behavior->getPropertyTable();
+        $propertyARClassname = $this->builder->getNewStubObjectBuilder($propertyTable)->getClassname();
+        $fks = $propertyTable->getForeignKeysReferencingTable($this->table->getName());
+        $relCol = $this->builder->getRefFKPhpNameAffix($fks[0], $plural = true);
+        return sprintf('get%s', ucfirst($relCol));
+    }
+
+    protected function getPropertyObjectsSetter()
+    {
+        $propertyTable = $this->behavior->getPropertyTable();
+        $propertyARClassname = $this->builder->getNewStubObjectBuilder($propertyTable)->getClassname();
+        $fks = $propertyTable->getForeignKeysReferencingTable($this->table->getName());
+        $relCol = $this->builder->getRefFKPhpNameAffix($fks[0], $plural = false);
+        return sprintf('add%s', ucfirst($relCol));
+    }
+
+    protected function getPropertyTableName()
+    {
+        $propertyTable = $this->behavior->getPropertyTable();
+        $propertyARClassname = $this->builder->getNewStubObjectBuilder($propertyTable)->getClassname();
+        return $propertyARClassname;
+    }
+
+    protected function getPropertyActiveRecordClassName()
+    {
+        $propertyTable = $this->behavior->getPropertyTable();
+        $propertyARClassname = $this->builder->getNewStubObjectBuilder($propertyTable)->getClassname();
+        return $propertyARClassname;
+    }
+
+    protected function getActiveRecordClassName()
+    {
+        return $this->builder->getStubObjectBuilder()->getClassname();
+    }
+
+    public function objectAttributes($builder)
+    {
+        $script = $this->getSinglePropertyScript();
+        $script .= $this->getMultiplePropertyScript();
+
+        return $script;
+    }
+
+    public function objectMethods($builder)
+    {
+        $this->setBuilder($builder);
+        $script = $this->getCommonPropertyMethods();
+        $script .= $this->getInitializePropertiesMethod();
+        $script .= $this->getSinglePropertyRegistrationMethods();
+        $script .= $this->getMultiplePropertyRegistrationMethods();
+        $script .= $this->getGetExtraPropertiesMethods();
+        return $script;
+    }
+
+    public function objectFilter(&$script)
+    {
+        $parser = new PropelPHPParser($script, true);
+        $construct = $parser->findMethod('__construct');
+        if (!strlen($construct)) {
+            $construct = <<<EOF
 
 /**
  * Initializes internal state of {$this->getActiveRecordClassName()} object.
@@ -145,29 +144,29 @@ public function __construct()
 }
 
 EOF;
-      $parser->addMethodBefore('initializeProperties', $construct);
+            $parser->addMethodBefore('initializeProperties', $construct);
+        }
+        $construct = $this->updateConstructFunctionWithInitialize($construct);
+        $parser->replaceMethod('__construct', $construct);
+        $script = $parser->getCode();
     }
-    $construct = $this->updateConstructFunctionWithInitialize($construct);
-    $parser->replaceMethod('__construct', $construct);
-    $script = $parser->getCode();
-  }
 
-  protected function updateConstructFunctionWithInitialize($currentCode)
-  {
-    return preg_replace('#(\s*)parent::__construct\(\);#', <<<EOF
+    protected function updateConstructFunctionWithInitialize($currentCode)
+    {
+        return preg_replace('#(\s*)parent::__construct\(\);#', <<<EOF
 $1parent::__construct();
 $1\$this->initializeProperties();
 EOF
-    , $currentCode);
-  }
+        , $currentCode);
+    }
 
-  /**
-   * add methods to define extra properties.
-   * @todo add default properties method generator.
-   */
-  protected function getInitializePropertiesMethod()
-  {
-    return <<<EOF
+    /**
+     * add methods to define extra properties.
+     * @todo add default properties method generator.
+     */
+    protected function getInitializePropertiesMethod()
+    {
+        return <<<EOF
 /**
  * initialize properties.
  * called in the constructor to add default properties.
@@ -176,29 +175,29 @@ protected function initializeProperties()
 {
 }
 EOF;
-  }
+    }
 
-  protected function getSinglePropertyScript()
-  {
-    return <<<EOF
+    protected function getSinglePropertyScript()
+    {
+        return <<<EOF
 
 /** the list of all single properties */
 protected \$extraProperties = array();
 EOF;
-  }
+    }
 
-  protected function getMultiplePropertyScript()
-  {
-    return <<<EOF
+    protected function getMultiplePropertyScript()
+    {
+        return <<<EOF
 
 /** the list of all multiple properties */
 protected \$multipleExtraProperties = array();
 EOF;
-  }
+    }
 
-  protected function getSinglePropertyRegistrationMethods()
-  {
-    return <<<EOF
+    protected function getSinglePropertyRegistrationMethods()
+    {
+        return <<<EOF
 /**
  * Returns the list of registered extra properties
  * that can be set only once.
@@ -296,11 +295,11 @@ public function getProperty(\$propertyName, \$defaultValue = null, PropelPDO \$c
             : \$defaultValue;
 }
 EOF;
-  }
+    }
 
-  protected function getCommonPropertyMethods()
-  {
-    return <<<EOF
+    protected function getCommonPropertyMethods()
+    {
+        return <<<EOF
 /**
  * convert propertyname in method to property name
  *
@@ -536,11 +535,11 @@ public function deletePropertiesByName(\$name, PropelPDO \$con = null)
   return \$props;
 }
 EOF;
-  }
+    }
 
-  protected function getMultiplePropertyRegistrationMethods()
-  {
-    return <<<EOF
+    protected function getMultiplePropertyRegistrationMethods()
+    {
+        return <<<EOF
 /**
  * returns the list of registered multiple properties
  *
@@ -623,11 +622,11 @@ public function getPropertiesByName(\$propertyName, \$default = array(), \$id = 
 }
 
 EOF;
-  }
+    }
 
-  protected function getGetExtraPropertiesMethods()
-  {
-    return <<<EOF
+    protected function getGetExtraPropertiesMethods()
+    {
+        return <<<EOF
 /**
  * returns an associative array with the properties and associated values.
  *
@@ -672,22 +671,19 @@ public function getExtraProperties(\$con = null)
   return \$ret;
 }
 EOF;
-  }
-
-  public function objectCall()
-  {
-    if(floatval(substr(Propel::VERSION,0,3)) >= 1.5)
-    {
-      $methodVar = '$name';
-      $paramVar = '$params';
-    }
-    else
-    {
-      $methodVar = '$method';
-      $paramVar = '$arguments';
     }
 
-    $script = <<<EOF
+    public function objectCall()
+    {
+        if(floatval(substr(Propel::VERSION, 0, 3)) >= 1.5) {
+            $methodVar = '$name';
+            $paramVar = '$params';
+        } else {
+            $methodVar = '$method';
+            $paramVar = '$arguments';
+        }
+
+        $script = <<<EOF
 // calls the registered properties dedicated functions
 if(in_array(\$methodName = substr({$methodVar}, 0,3), array('add', 'set', 'has', 'get')))
 {
@@ -761,7 +757,7 @@ if(isset(\$propertyName))
 
 EOF;
     if ('true' === $this->getParameter('throw_error')) {
-      $script .= <<<EOF
+        $script .= <<<EOF
     //* no error throw to make sure other behaviors can be called.
     else
     {
@@ -780,8 +776,7 @@ EOF;
 
 }
 
-EOF
-    ;
-    return $script;
-  }
+EOF;
+        return $script;
+    }
 } // END OF ExtraPropertiesBehaviorObjectBuilderModifier

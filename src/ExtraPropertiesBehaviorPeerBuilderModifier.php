@@ -13,26 +13,26 @@
  */
 class ExtraPropertiesBehaviorPeerBuilderModifier
 {
-  protected $behavior, $table;
+    protected $behavior, $table;
 
-  public function __construct($behavior)
-  {
-    $this->behavior = $behavior;
-    $this->table = $behavior->getTable();
-  }
-  protected function getParameter($key)
-  {
-    return $this->behavior->getParameter($key);
-  }
+    public function __construct($behavior)
+    {
+        $this->behavior = $behavior;
+        $this->table = $behavior->getTable();
+    }
+    protected function getParameter($key)
+    {
+        return $this->behavior->getParameter($key);
+    }
 
-  public function shouldNormalize()
-  {
-    return 'true' === $this->getParameter('normalize');
-  }
+    public function shouldNormalize()
+    {
+        return 'true' === $this->getParameter('normalize');
+    }
 
-  public function staticMethods()
-  {
-    $script = <<<EOF
+    public function staticMethods()
+    {
+        $script = <<<EOF
 /**
  * Normalizes property name.
  *
@@ -43,16 +43,16 @@ static function normalizeExtraPropertyName(\$propertyName)
 {
 
 EOF;
-    if ($this->shouldNormalize()) {
-      $script .= <<<EOF
+        if ($this->shouldNormalize()) {
+            $script .= <<<EOF
   return strtoupper(\$propertyName);
 EOF;
-   } else {
-      $script .= <<<EOF
+        } else {
+            $script .= <<<EOF
   return \$propertyName;
 EOF;
-    }
-    $script .= <<<EOF
+        }
+        $script .= <<<EOF
 
 }
 
@@ -68,6 +68,6 @@ static function normalizeExtraPropertyValue(\$propertyValue)
 }
 EOF;
 
-    return $script;
-  }
+        return $script;
+    }
 } // END OF ExtraPropertiesBehaviorPeerBuilderModifier
