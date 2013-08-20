@@ -376,7 +376,7 @@ EOF;
         $this->assertEquals(array(), $obj->getPropertiesByName('biz', array(), null, $con));
     }
 
-    public function getExtraPropertiesDataProvider()
+    public function getPropertiesDataProvider()
     {
         return array(
             'test none defined' => array(
@@ -416,9 +416,9 @@ EOF;
     }
 
     /**
-     * @dataProvider getExtraPropertiesDataProvider
+     * @dataProvider getPropertiesDataProvider
      */
-    public function testGetExtraProperties($properties, $expected)
+    public function testGetProperties($properties, $expected)
     {
         $obj = new ExtraPropertiesBehaviorTest1();
 
@@ -446,6 +446,10 @@ EOF;
             }
         }
 
+        $this->assertInternalType('array', $obj->getProperties());
+        $this->assertEquals($expected, $obj->getProperties());
+
+        // getExtraProperties() is an alias to getProperties()...
         $this->assertInternalType('array', $obj->getExtraProperties());
         $this->assertEquals($expected, $obj->getExtraProperties());
     }

@@ -630,9 +630,21 @@ EOF;
 /**
  * returns an associative array with the properties and associated values.
  *
+ * @deprecated Prefer the getProperties() method
+ *
  * @return array
  */
 public function getExtraProperties(\$con = null)
+{
+  return \$this->getProperties(\$con);
+}
+
+/**
+ * returns an associative array with the properties and associated values.
+ *
+ * @return array
+ */
+public function getProperties(\$con = null)
 {
   \$ret = array();
 

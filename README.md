@@ -99,7 +99,7 @@ To do so, declare an extra properties list using the following methods:
 
 ### property extraction methods
 
- * `getExtraProperties()` returns an array of properties
+ * `getProperties()` returns an array of properties
 
 Configuration
 -------------
@@ -170,7 +170,7 @@ $user->addMyMultiplePreference('pref2');
 $user->save();
 
 // extract properties
-$user->getExtraProperties();
+$user->getProperties();
 // will result in
 // array(
 //   'MY_MODULE_PREFERENCE' => 'preference',
