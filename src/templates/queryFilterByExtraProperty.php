@@ -1,21 +1,37 @@
 /**
- * Filter based on an extra property
+ * Filter based on a <?php echo $propertyName ?>
  *
- * If the property is not set for a particular object it will be present in the results
+ * If the <?php echo $propertyName ?> is not set for a particular object it will be present in the results
  *
- * @var string $propertyName The name of the property to filter on
- * @var mixed $propertyValue The value of the property to filter on
+ * @var string $<?php echo $propertyName ?>Name The name of the <?php echo $propertyName ?> to filter on
+ * @var mixed $<?php echo $propertyName ?>Value The value of the <?php echo $propertyName ?> to filter on
  *
  * @return <?php echo $queryClassName . PHP_EOL ?>
  */
-public function filterByExtraProperty($propertyName, $propertyValue)
+public function filterBy<?php echo $propertyNameMethod ?>($<?php echo $propertyName ?>Name, $<?php echo $propertyName ?>Value)
 {<?php echo "\n"; if ($shouldNormalize): ?>
-  $propertyName = <?php echo $peerClassName ?>::normalizeExtraPropertyName($propertyName);
-  $propertyValue = <?php echo $peerClassName ?>::normalizeExtraPropertyValue($propertyValue);
+  $<?php echo $propertyName ?>Name = <?php echo $peerClassName ?>::normalize<?php echo $propertyNameMethod ?>Name($<?php echo $propertyName ?>Name);
+  $<?php echo $propertyName ?>Value = <?php echo $peerClassName ?>::normalize<?php echo $propertyNameMethod ?>Value($<?php echo $propertyName ?>Value);
 <?php echo "\n"; endif;  ?>
   return $this
-    -><?php echo $joinExtraPropertyTableMethod ?>($joinName = $propertyName . '_' . uniqid())
-    ->addJoinCondition($joinName, "{$joinName}.<?php echo $propertyPropertyNameColName ?> = ?", $propertyName)
-    ->where("{$joinName}.<?php echo $propertyPropertyValueColName ?> = ?", $propertyValue);
+    -><?php echo $joinExtraPropertyTableMethod ?>($joinName = $<?php echo $propertyName ?>Name . '_' . uniqid())
+    ->addJoinCondition($joinName, "{$joinName}.<?php echo $propertyPropertyNameColName ?> = ?", $<?php echo $propertyName ?>Name)
+    ->where("{$joinName}.<?php echo $propertyPropertyValueColName ?> = ?", $<?php echo $propertyName ?>Value);
 }
 
+/**
+ * Filter based on a <?php echo $propertyName ?>
+ *
+ * If the <?php echo $propertyName ?> is not set for a particular object it will be present in the results
+ *
+ * @deprecated see filterBy<?php echo $propertyNameMethod ?>()
+ *
+ * @var string $<?php echo $propertyName ?>Name The name of the <?php echo $propertyName ?> to filter on
+ * @var mixed $<?php echo $propertyName ?>Value The value of the <?php echo $propertyName ?> to filter on
+ *
+ * @return <?php echo $queryClassName . PHP_EOL ?>
+ */
+public function filterByExtra<?php echo $propertyNameMethod ?>($<?php echo $propertyName ?>Name, $<?php echo $propertyName ?>Value)
+{
+  return $this->filterBy<?php echo $propertyNameMethod ?>($<?php echo $propertyName ?>Name, $<?php echo $propertyName ?>Value);
+}
