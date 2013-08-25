@@ -31,7 +31,7 @@ public function filterBy<?php echo $propertyNameMethod ?>($<?php echo $propertyN
  *
  * @return <?php echo $queryClassName . PHP_EOL ?>
  */
-public function filterByExtra<?php echo $propertyNameMethod ?>($<?php echo $propertyName ?>Name, $<?php echo $propertyName ?>Value)
+public function filterByExtraProperty($<?php echo $propertyName ?>Name, $<?php echo $propertyName ?>Value)
 {
   return $this->filterBy<?php echo $propertyNameMethod ?>($<?php echo $propertyName ?>Name, $<?php echo $propertyName ?>Value);
 }

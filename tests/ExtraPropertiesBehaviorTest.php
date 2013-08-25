@@ -417,6 +417,14 @@ EOF;
         $this->assertEquals(array(), $obj->getParametersByName('biz', array(), null, $con));
     }
 
+    public function testWithCustomPropertyNameQuery()
+    {
+        $this->assertTrue(method_exists('VideoQuery', 'filterByParameter'));
+        $this->assertTrue(method_exists('VideoQuery', 'filterByExtraProperty'));
+        $this->assertTrue(method_exists('VideoQuery', 'filterByParameterWithDefault'));
+        $this->assertTrue(method_exists('VideoQuery', 'filterByExtraPropertyWithDefault'));
+    }
+
     public function getPropertiesDataProvider()
     {
         return array(
