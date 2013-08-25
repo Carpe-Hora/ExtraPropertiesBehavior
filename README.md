@@ -130,8 +130,10 @@ First declare the behavior in your ```schema.xml```:
       <parameter name="property_value_column" value="value" />
       <!-- normalize property names and values using peer normalize methods ? -->
       <parameter name="normalize" value="true" />
-      <!-- throw an error if shortcut get{PropertyName} cannot resole PropertyName ? -->
+      <!-- throw an error if shortcut get{PropertyName} cannot resolve PropertyName ? -->
       <parameter name="throw_error" value="true" />
+      <!-- property denomination, if instead of properties, you think in terms of parameters/details/whatever -->
+      <parameter name="property_name" value="property" />
     </behavior>
   </table>
 </database>
@@ -164,7 +166,7 @@ $user->getMyOtherPreference();             // or call $user->getProperty('my_oth
 $user->setMyOtherPreference('preference'); // or call $user->setProperty('my_other_preference', 'preference');
 
 // simply deal with multiple occurences
-$user->registerProperty('MY_MULTIPLE_PREFERENCE');
+$user->registerMultipleProperty('MY_MULTIPLE_PREFERENCE');
 $user->addMyMultiplePreference('pref1');
 $user->addMyMultiplePreference('pref2');
 $user->save();
