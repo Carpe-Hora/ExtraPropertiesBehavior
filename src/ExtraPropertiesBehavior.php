@@ -20,8 +20,10 @@ class ExtraPropertiesBehavior extends Behavior
     /** parameters default values */
     protected $parameters = array(
         'properties_table'      => null,
+        'property_name'         => 'property',
         'property_name_column'  => 'property_name',
         'property_value_column' => 'property_value',
+        // @fixme unused
         'default_properties'    => '',
         'normalize'             => 'true',
         'throw_error'           => 'true'

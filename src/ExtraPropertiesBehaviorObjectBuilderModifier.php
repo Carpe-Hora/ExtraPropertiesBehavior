@@ -14,7 +14,7 @@
  */
 class ExtraPropertiesBehaviorObjectBuilderModifier
 {
-    protected $behavior, $table, $builder, $objectClassname, $peerClassname;
+    protected $behavior, $table, $builder, $objectClassname, $peerClassname, $pluralizer;
 
     public function __construct($behavior)
     {
@@ -31,6 +31,15 @@ class ExtraPropertiesBehaviorObjectBuilderModifier
 
         // Add namespace for PHP >= 5.3
         $builder->declareClass('RuntimeException');
+    }
+
+    protected function getPluralForm($root)
+    {
+        if ($this->pluralizer === null) {
+            $this->pluralizer = new StandardEnglishPluralizer();
+        }
+
+        return $this->pluralizer->getPluralForm($root);
     }
 
     protected function getParameter($key)
@@ -132,6 +141,8 @@ class ExtraPropertiesBehaviorObjectBuilderModifier
     {
         $parser = new PropelPHPParser($script, true);
         $construct = $parser->findMethod('__construct');
+        $propertiesName = ucfirst($this->getPluralForm($this->getParameter('property_name')));
+
         if (!strlen($construct)) {
             $construct = <<<EOF
 
@@ -144,7 +155,7 @@ public function __construct()
 }
 
 EOF;
-            $parser->addMethodBefore('initializeProperties', $construct);
+            $parser->addMethodBefore('initialize'.$propertiesName, $construct);
         }
         $construct = $this->updateConstructFunctionWithInitialize($construct);
         $parser->replaceMethod('__construct', $construct);
@@ -153,9 +164,11 @@ EOF;
 
     protected function updateConstructFunctionWithInitialize($currentCode)
     {
+        $propertiesName = ucfirst($this->getPluralForm($this->getParameter('property_name')));
+
         return preg_replace('#(\s*)parent::__construct\(\);#', <<<EOF
 $1parent::__construct();
-$1\$this->initializeProperties();
+$1\$this->initialize$propertiesName();
 EOF
         , $currentCode);
     }
@@ -166,12 +179,15 @@ EOF
      */
     protected function getInitializePropertiesMethod()
     {
+        $propertiesName = $this->getPluralForm($this->getParameter('property_name'));
+        $propertiesNameMethod = ucfirst($propertiesName);
+
         return <<<EOF
 /**
- * initialize properties.
- * called in the constructor to add default properties.
+ * initialize $propertiesName.
+ * called in the constructor to add default $propertiesName.
  */
-protected function initializeProperties()
+protected function initialize$propertiesNameMethod()
 {
 }
 EOF;
@@ -179,118 +195,129 @@ EOF;
 
     protected function getSinglePropertyScript()
     {
+        $propertiesName = $this->getPluralForm($this->getParameter('property_name'));
+        $propertiesNameMethod = ucfirst($propertiesName);
+
         return <<<EOF
 
-/** the list of all single properties */
-protected \$extraProperties = array();
+/** the list of all single $propertiesName */
+protected \$extra$propertiesNameMethod = array();
 EOF;
     }
 
     protected function getMultiplePropertyScript()
     {
+        $propertiesName = $this->getPluralForm($this->getParameter('property_name'));
+        $propertiesNameMethod = ucfirst($propertiesName);
+
         return <<<EOF
 
-/** the list of all multiple properties */
-protected \$multipleExtraProperties = array();
+/** the list of all multiple $propertiesName */
+protected \$multipleExtra$propertiesNameMethod = array();
 EOF;
     }
 
     protected function getSinglePropertyRegistrationMethods()
     {
+        $propertyName = $this->getParameter('property_name');
+        $propertyNameMethod = ucfirst($propertyName);
+        $propertiesName = $this->getPluralForm($propertyName);
+        $propertiesNameMethod = ucfirst($propertiesName);
+
         return <<<EOF
 /**
- * Returns the list of registered extra properties
+ * Returns the list of registered $propertiesName
  * that can be set only once.
  *
  * @return array
  */
-public function getRegisteredSingleProperties()
+public function getRegisteredSingle$propertiesNameMethod()
 {
-  return array_keys(\$this->extraProperties);
+  return array_keys(\$this->extra$propertiesNameMethod);
 }
 
 /**
- * Register a new single occurence property \$propertyName for the object.
+ * Register a new single occurence $propertyName \${$propertyName}Name for the object.
  * The property will be accessible through {$this->getPropertyColumnGetter('property_name_column')} method.
  *
- * @param String  \$propertyName   the property name.
- * @param Mixed   \$defaultValue   default property value.
+ * @param String  \${$propertyName}Name   the $propertyName name.
+ * @param Mixed   \$defaultValue   default $propertyName value.
  *
  * @return {$this->getActiveRecordClassName()}
  */
-public function registerProperty(\$propertyName, \$defaultValue = null)
+public function register$propertyNameMethod(\${$propertyName}Name, \$defaultValue = null)
 {
-  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
+  \${$propertyName}Name = {$this->peerClassname}::normalize{$propertyNameMethod}Name(\${$propertyName}Name);
   /* comment this line to remove default value update ability
-  if(!array_key_exists(\$propertyName, \$this->extraProperties))
+  if(!array_key_exists(\${$propertyName}Name, \$this->extra$propertiesNameMethod))
   {
-    \$this->extraProperties[\$propertyName] = \$defaultValue;
+    \$this->extraProperties[\${$propertyName}Name] = \$defaultValue;
   }
   /*/
-  \$this->extraProperties[\$propertyName] = \$defaultValue;
+  \$this->extraProperties[\${$propertyName}Name] = \$defaultValue;
   //*/
   return \$this;
 }
 
 /**
- * Set a single occurence property.
- * If the property already exists, then it is ovverriden, ortherwise
- * new property is created.
+ * Set a single occurence $propertyName.
+ * If the $propertyName already exists, then it is overriden, ortherwise
+ * new $propertyName is created.
  *
- * @param String    \$name   the property name.
- * @param Mixed     \$value  default property value.
+ * @param String    \$name   the $propertyName name.
+ * @param Mixed     \$value  default $propertyName value.
  * @param PropelPDO \$con    Optional connection object
  *
  * @return {$this->getActiveRecordClassName()}
  */
-public function setProperty(\$name, \$value, PropelPDO \$con = null)
+public function set$propertyNameMethod(\$name, \$value, PropelPDO \$con = null)
 {
-  \$name = {$this->peerClassname}::normalizeExtraPropertyName(\$name);
-  if(\$this->hasProperty(\$name, \$con))
+  \$name = {$this->peerClassname}::normalize{$propertyNameMethod}Name(\$name);
+  if(\$this->has$propertyNameMethod(\$name, \$con))
   {
-    \$properties = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
-    foreach(\$properties as \$prop)
+    \${$propertiesName} = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
+    foreach(\${$propertiesName} as \${$propertyName})
     {
-      if(\$prop->{$this->getPropertyColumnGetter('property_name_column')}() == \$name)
+      if(\${$propertyName}->{$this->getPropertyColumnGetter('property_name_column')}() == \$name)
       {
-        \$prop->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalizeExtraPropertyValue(\$value));
+        \${$propertyName}->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalize{$propertyNameMethod}Value(\$value));
         return \$this;
       }
     }
   }
   else
   {
-    \$property = new {$this->getPropertyActiveRecordClassName()}();
-    \$property->{$this->getPropertyColumnSetter('property_name_column')}(\$name);
-    \$property->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalizeExtraPropertyValue(\$value));
-    \$this->{$this->getPropertyObjectsSetter()}(\$property);
+    \${$propertyName} = new {$this->getPropertyActiveRecordClassName()}();
+    \${$propertyName}->{$this->getPropertyColumnSetter('property_name_column')}(\$name);
+    \${$propertyName}->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalize{$propertyNameMethod}Value(\$value));
+    \$this->{$this->getPropertyObjectsSetter()}(\${$propertyName});
   }
   return \$this;
 }
 
 /**
- * Get the value of an extra property that can appear only once.
+ * Get the value of an extra $propertyName that can appear only once.
  *
- * @param   String    \$propertyName   the name of propertyto retrieve.
- * @param   Mixed     \$defaultValue   default value if property isn't set.
+ * @param   String    \${$propertyName}Name   the name of $propertyName retrieve.
+ * @param   Mixed     \$defaultValue   default value if $propertyName isn't set.
  * @param   PropelPDO \$con            Optional connection object
  *
  * @return  Mixed
  */
-public function getProperty(\$propertyName, \$defaultValue = null, PropelPDO \$con = null)
+public function get$propertyNameMethod(\${$propertyName}Name, \$defaultValue = null, PropelPDO \$con = null)
 {
-  \$properties = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
-  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
-  foreach(\$properties as \$prop)
+  \${$propertiesName} = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
+  \${$propertyName}Name = {$this->peerClassname}::normalize{$propertyNameMethod}Name(\${$propertyName}Name);
+  foreach(\${$propertiesName} as \${$propertyName})
   {
-    if(\$prop->{$this->getPropertyColumnGetter('property_name_column')}() == \$propertyName)
+    if(\${$propertyName}->{$this->getPropertyColumnGetter('property_name_column')}() == \${$propertyName}Name)
     {
-      return \$prop->{$this->getPropertyColumnGetter('property_value_column')}();
+      return \${$propertyName}->{$this->getPropertyColumnGetter('property_value_column')}();
     }
   }
   return is_null(\$defaultValue)
-            ? isset(\$this->extraProperties[\$propertyName])
-                      ? \$this->extraProperties[\$propertyName]
+            ? isset(\$this->extraProperties[\${$propertyName}Name])
+                      ? \$this->extraProperties[\${$propertyName}Name]
                       : null
             : \$defaultValue;
 }
@@ -299,15 +326,20 @@ EOF;
 
     protected function getCommonPropertyMethods()
     {
+        $propertyName = $this->getParameter('property_name');
+        $propertyNameMethod = ucfirst($propertyName);
+        $propertiesName = $this->getPluralForm($propertyName);
+        $propertiesNameMethod = ucfirst($propertiesName);
+
         return <<<EOF
 /**
- * convert propertyname in method to property name
+ * convert a value to a valid $propertyName name
  *
- * @param String \$name the camelized property name
+ * @param String \$name the camelized {$propertyName} name
  *
  * @return String
  */
-protected function extraPropertyNameFromMethod(\$name)
+protected function extra{$propertyNameMethod}NameFromMethod(\$name)
 {
   \$tmp = \$name;
   \$tmp = str_replace('::', '/', \$tmp);
@@ -317,36 +349,36 @@ protected function extraPropertyNameFromMethod(\$name)
 }
 
 /**
- * checks that the event defines a property with \$propertyName
+ * checks that the event defines a $propertyName with \${$propertyName}Name
  *
  * @todo optimize to make it stop on first occurence
  *
- * @param String    \$propertyName  name of the property to check.
+ * @param String    \${$propertyName}Name  name of the $propertyName to check.
  * @param PropelPDO \$con           Optional connection object
  *
  * @return Boolean
  */
-public function hasProperty(\$propertyName, PropelPDO \$con = null)
+public function has$propertyNameMethod(\${$propertyName}Name, PropelPDO \$con = null)
 {
-  return \$this->countPropertiesByName(\$propertyName, \$con) > 0;
+  return \$this->count{$propertiesNameMethod}ByName(\${$propertyName}Name, \$con) > 0;
 }
 
 /**
- * Count the number of occurences of \$propertyName.
+ * Count the number of occurences of \${$propertyName}Name.
  *
- * @param   String    \$propertyName   the property to count.
+ * @param   String    \${$propertyName}Name   the $propertyName to count.
  * @param   PropelPDO \$con            Optional connection object
  *
  * @return  Integer
  */
-public function countPropertiesByName(\$propertyName, PropelPDO \$con = null)
+public function count{$propertiesNameMethod}ByName(\${$propertyName}Name, PropelPDO \$con = null)
 {
   \$count = 0;
-  \$properties = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
-  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
-  foreach(\$properties as \$prop)
+  \${$propertiesName} = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
+  \${$propertyName}Name = {$this->peerClassname}::normalize{$propertyNameMethod}Name(\${$propertyName}Name);
+  foreach(\${$propertiesName} as \${$propertyName})
   {
-    if(\$prop->{$this->getPropertyColumnGetter('property_name_column')}() == \$propertyName)
+    if(\${$propertyName}->{$this->getPropertyColumnGetter('property_name_column')}() == \${$propertyName}Name)
     {
       \$count++;
     }
@@ -355,19 +387,19 @@ public function countPropertiesByName(\$propertyName, PropelPDO \$con = null)
 }
 
 /**
- * Set the property with id \$id.
- * can only be used with an already set property
+ * Set the $propertyName with id \$id.
+ * can only be used with an already set $propertyName
  *
  * @param   PropelPDO \$con Optional connection object
  *
  * @return {$this->getActiveRecordClassName()}|false
  */
-protected function setPropertyById(\$id, \$value, PropelPDO \$con = null)
+protected function set{$propertyNameMethod}ById(\$id, \$value, PropelPDO \$con = null)
 {
-  \$prop = \$this->getPropertyObjectById(\$id, \$con);
-  if(\$prop instanceof {$this->getPropertyTableName()})
+  \${$propertyName} = \$this->get{$propertyNameMethod}ObjectById(\$id, \$con);
+  if(\${$propertyName} instanceof {$this->getPropertyTableName()})
   {
-    \$prop->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalizeExtraPropertyValue(\$value));
+    \${$propertyName}->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalize{$propertyNameMethod}Value(\$value));
     return \$this;
   }
   else
@@ -377,101 +409,101 @@ protected function setPropertyById(\$id, \$value, PropelPDO \$con = null)
 }
 
 /**
- * Retrive property objects with \$propertyName.
+ * Retrive $propertyName objects with \${$propertyName}Name.
  *
- * @param   String    \$propertyName the properties to look for.
+ * @param   String    \${$propertyName}Name the {$propertiesName} to look for.
  * @param   PropelPDO \$con          Optional connection object
  *
  * @return  Array
  */
-protected function getPropertiesObjectsByName(\$propertyName, PropelPDO \$con = null)
+protected function get{$propertiesNameMethod}ObjectsByName(\${$propertyName}Name, PropelPDO \$con = null)
 {
   \$ret = array();
-  \$properties = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
-  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
-  foreach(\$properties as \$prop)
+  \${$propertiesName} = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
+  \${$propertyName}Name = {$this->peerClassname}::normalize{$propertyNameMethod}Name(\${$propertyName}Name);
+  foreach(\${$propertiesName} as \${$propertyName})
   {
-    if(\$prop->{$this->getPropertyColumnGetter('property_name_column')}() == \$propertyName)
+    if(\${$propertyName}->{$this->getPropertyColumnGetter('property_name_column')}() == \${$propertyName}Name)
     {
-      \$ret[\$prop->getId() ? \$prop->getId() : \$propertyName.'_'.count(\$ret)] = \$prop;
+      \$ret[\${$propertyName}->getId() ? \${$propertyName}->getId() : \${$propertyName}Name.'_'.count(\$ret)] = \${$propertyName};
     }
   }
   return \$ret;
 }
 
 /**
- * Retrieve related property with \$id.
- * If property is not saved yet, id is the list index, created this way :
- * \$propertyName.'_'.\$index.
+ * Retrieve related $propertyName with \$id.
+ * If $propertyName is not saved yet, id is the list index, created this way :
+ * \${$propertyName}Name.'_'.\$index.
  *
- * @param Integer|String  \$id   the id of prorty to retrieve.
+ * @param Integer|String  \$id   the id of the $propertyName to retrieve.
  * @param PropelPDO       \$con  Optional connection object
  *
  * @return {$this->getPropertyActiveRecordClassName()}
  */
-protected function getPropertyObjectById(\$id, PropelPDO \$con = null)
+protected function get{$propertyNameMethod}ObjectById(\$id, PropelPDO \$con = null)
 {
   if(is_numeric(\$id))
   {
-    \$properties = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
-    foreach(\$properties as \$prop)
+    \${$propertiesName} = \$this->{$this->getPropertyObjectsGetter()}(null, \$con);
+    foreach(\${$propertiesName} as \${$propertyName})
     {
-      if(\$prop->getId() == \$id)
+      if(\${$propertyName}->getId() == \$id)
       {
-        return \$prop;
+        return \${$propertyName};
       }
     }
   }
   else
   {
-    \$propertyName = substr(\$id, 0, strrpos(\$id, '_'));
-    \$properties = \$this->getPropertiesObjectsByName(\$propertyName, \$con);
-    return \$properties[\$id];
+    \${$propertyName}Name = substr(\$id, 0, strrpos(\$id, '_'));
+    \${$propertiesName} = \$this->get{$propertiesNameMethod}ObjectsByName(\${$propertyName}Name, \$con);
+    return \${$propertiesName}[\$id];
   }
 }
 
 /**
- * Check wether property with \$id is
+ * Check wether $propertyName with \$id is
  *
  * @param PropelPDO \$con  Optional connection object
  */
-protected function isPropertyWithIdA(\$id, \$propertyName, PropelPDO \$con = null)
+protected function is{$propertyNameMethod}WithIdA(\$id, \${$propertyName}Name, PropelPDO \$con = null)
 {
-  \$prop = \$this->getPropertyObjectById(\$id, \$con);
-  return \$prop && \$prop->{$this->getPropertyColumnGetter('property_name_column')}() == {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
+  \${$propertyName} = \$this->get{$propertyNameMethod}ObjectById(\$id, \$con);
+  return \${$propertyName} && \${$propertyName}->{$this->getPropertyColumnGetter('property_name_column')}() == {$this->peerClassname}::normalize{$propertyNameMethod}Name(\${$propertyName}Name);
 }
 
 /**
- * wrapped function on update{Property} callback
+ * wrapped function on update{{$propertyNameMethod}} callback
  *
- * @param string          \$name  the property to update's type
+ * @param string          \$name  the $propertyName to update's type
  * @param mixed           \$value the new value
- * @param integer|string  \$id    the id of the property to update
+ * @param integer|string  \$id    the id of the $propertyName to update
  * @param PropelPDO       \$con   Optional connection object
  *
  * @return Boolean|{$this->getPropertyActiveRecordClassName()}
  */
-protected function setPropertyByNameAndId(\$name, \$value, \$id, PropelPDO \$con = null)
+protected function set{$propertyNameMethod}ByNameAndId(\$name, \$value, \$id, PropelPDO \$con = null)
 {
-  if(\$this->isPropertyWithIdA(\$id, {$this->peerClassname}::normalizeExtraPropertyName(\$name), \$con))
+  if(\$this->is{$propertyNameMethod}WithIdA(\$id, {$this->peerClassname}::normalize{$propertyNameMethod}Name(\$name), \$con))
   {
-    return \$this->setPropertyById(\$id, \$value);
+    return \$this->set{$propertyNameMethod}ById(\$id, \$value);
   }
   return false;
 }
 
 /**
- * get the property with id \$id.
- * can only be used with an already set property
+ * get the $propertyName with id \$id.
+ * can only be used with an already set $propertyName
  *
  * @param PropelPDO \$con Optional connection object
  */
-protected function getPropertyById(\$id, \$defaultValue = null, PropelPDO \$con = null)
+protected function get{$propertyNameMethod}ById(\$id, \$defaultValue = null, PropelPDO \$con = null)
 {
-  \$prop = \$this->getPropertyObjectById(\$id, \$con);
-  if(\$prop instanceof {$this->getPropertyActiveRecordClassName()})
+  \${$propertyName} = \$this->get{$propertyNameMethod}ObjectById(\$id, \$con);
+  if(\${$propertyName} instanceof {$this->getPropertyActiveRecordClassName()})
   {
-    return \$prop->{$this->getPropertyColumnGetter('property_value_column')}();
+    return \${$propertyName}->{$this->getPropertyColumnGetter('property_value_column')}();
   }
   else
   {
@@ -480,35 +512,35 @@ protected function getPropertyById(\$id, \$defaultValue = null, PropelPDO \$con 
 }
 
 /**
- * wrapped function on deleteProperty callback
+ * wrapped function on delete$propertyNameMethod callback
  *
  * @param PropelPDO \$con Optional connection object
  */
-protected function deletePropertyByNameAndId(\$name, \$id, PropelPDO \$con = null)
+protected function delete{$propertyNameMethod}ByNameAndId(\$name, \$id, PropelPDO \$con = null)
 {
-  if(\$this->isPropertyWithIdA(\$id, {$this->peerClassname}::normalizeExtraPropertyName(\$name), \$con))
+  if(\$this->is{$propertyNameMethod}WithIdA(\$id, {$this->peerClassname}::normalize{$propertyNameMethod}Name(\$name), \$con))
   {
-    return \$this->deletePropertyById(\$id, \$con);
+    return \$this->delete{$propertyNameMethod}ById(\$id, \$con);
   }
   return false;
 }
 
 /**
- * delete a multiple occurence property
+ * delete a multiple occurence $propertyName
  *
  * @param PropelPDO \$con  Optional connection object
  */
-protected function deletePropertyById(\$id, PropelPDO \$con = null)
+protected function delete{$propertyNameMethod}ById(\$id, PropelPDO \$con = null)
 {
-  \$prop = \$this->getPropertyObjectById(\$id, \$con);
-  if(\$prop instanceof {$this->getPropertyActiveRecordClassName()})
+  \${$propertyName} = \$this->get{$propertyNameMethod}ObjectById(\$id, \$con);
+  if(\${$propertyName} instanceof {$this->getPropertyActiveRecordClassName()})
   {
-    if(!\$prop->isNew())
+    if(!\${$propertyName}->isNew())
     {
-      \$prop->delete(\$con);
+      \${$propertyName}->delete(\$con);
     }
-    \$this->{$this->getPropertyObjectsColumn()}->remove(\$this->{$this->getPropertyObjectsColumn()}->search(\$prop));
-    return \$prop;
+    \$this->{$this->getPropertyObjectsColumn()}->remove(\$this->{$this->getPropertyObjectsColumn()}->search(\${$propertyName}));
+    return \${$propertyName};
   }
   else
   {
@@ -517,98 +549,103 @@ protected function deletePropertyById(\$id, PropelPDO \$con = null)
 }
 
 /**
- * delete all properties with \$name
+ * delete all {$propertiesName} with \$name
  *
  * @param PropelPDO \$con Optional connection object
  */
-public function deletePropertiesByName(\$name, PropelPDO \$con = null)
+public function delete{$propertiesName}ByName(\$name, PropelPDO \$con = null)
 {
-  \$props = \$this->getPropertiesObjectsByName(\$name, \$con);
-  foreach(\$props as \$prop)
+  \${$propertiesName} = \$this->get{$propertiesNameMethod}ObjectsByName(\$name, \$con);
+  foreach(\${$propertiesName} as \${$propertyName})
   {
-    if(\$prop instanceof {$this->getPropertyActiveRecordClassName()})
+    if(\${$propertyName} instanceof {$this->getPropertyActiveRecordClassName()})
     {
-      \$prop->delete(\$con);
-      \$this->{$this->getPropertyObjectsColumn()}->remove(\$this->{$this->getPropertyObjectsColumn()}->search(\$prop));
+      \${$propertyName}->delete(\$con);
+      \$this->{$this->getPropertyObjectsColumn()}->remove(\$this->{$this->getPropertyObjectsColumn()}->search(\${$propertyName}));
     }
   }
-  return \$props;
+  return \${$propertiesName};
 }
 EOF;
     }
 
     protected function getMultiplePropertyRegistrationMethods()
     {
+        $propertyName = $this->getParameter('property_name');
+        $propertyNameMethod = ucfirst($propertyName);
+        $propertiesName = $this->getPluralForm($propertyName);
+        $propertiesNameMethod = ucfirst($propertiesName);
+
         return <<<EOF
 /**
- * returns the list of registered multiple properties
+ * returns the list of registered multiple {$propertiesName}
  *
  * @return array
  */
-public function getRegisteredMultipleProperties()
+public function getRegisteredMultiple{$propertiesNameMethod}()
 {
-  return array_keys(\$this->multipleExtraProperties);
+  return array_keys(\$this->multipleExtra{$propertiesNameMethod});
 }
 
 /**
- * Register a new multiple occurence property \$propertyName for the object.
- * The properties will be accessible through {$this->getPropertyColumnGetter('property_name_column')}s method.
+ * Register a new multiple occurence $propertyName \${$propertyName}Name for the object.
+ * The {$propertiesName} will be accessible through {$this->getPropertyColumnGetter('property_name_column')}s method.
  *
- * @param String  \$propertyName   the property name.
- * @param Mixed   \$defaultValue   default property value.
+ * @param String  \${$propertyName}Name   the $propertyName name.
+ * @param Mixed   \$defaultValue   default $propertyName value.
  * @return {$this->getActiveRecordClassName()}
  */
-public function registerMultipleProperty(\$propertyName, \$defaultValue = null)
+public function registerMultiple{$propertyNameMethod}(\${$propertyName}Name, \$defaultValue = null)
 {
-  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$propertyName);
+  \${$propertyName}Name = {$this->peerClassname}::normalize{$propertyNameMethod}Name(\${$propertyName}Name);
   /* comment this line to remove default value update ability
-  if(!array_key_exists(\$propertyName, \$this->multipleExtraProperties))
+  if(!array_key_exists(\${$propertyName}Name, \$this->multipleExtra{$propertiesNameMethod}))
   {
-    \$this->multipleExtraProperties[\$propertyName] = \$defaultValue;
+    \$this->multipleExtra{$propertiesNameMethod}[\${$propertyName}Name] = \$defaultValue;
   }
   /*/
-  \$this->multipleExtraProperties[\$propertyName] = \$defaultValue;
+  \$this->multipleExtra{$propertiesNameMethod}[\${$propertyName}Name] = \$defaultValue;
   //*/
   return \$this;
 }
 
 /**
- * adds a multiple instance property to event
+ * adds a multiple instance $propertyName to event
  *
- * @param String  \$propertyName   the name of the property to add.
- * @param Mixed   \$value          the value for new property.
+ * @param String  \${$propertyName}Name   the name of the $propertyName to add.
+ * @param Mixed   \$value          the value for new $propertyName.
  */
-public function addProperty(\$propertyName, \$value)
+public function add{$propertyNameMethod}(\${$propertyName}Name, \$value)
 {
-  \$property = new {$this->getPropertyActiveRecordClassName()}();
-  \$property->{$this->getPropertyColumnSetter('property_name_column')}({$this->peerClassname}::normalizeExtraPropertyName(\$propertyName));
-  \$property->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalizeExtraPropertyValue(\$value));
-  \$this->{$this->getPropertyObjectsSetter()}(\$property);
+  \${$propertyName} = new {$this->getPropertyActiveRecordClassName()}();
+  \${$propertyName}->{$this->getPropertyColumnSetter('property_name_column')}({$this->peerClassname}::normalize{$propertyNameMethod}Name(\${$propertyName}Name));
+  \${$propertyName}->{$this->getPropertyColumnSetter('property_value_column')}({$this->peerClassname}::normalize{$propertyNameMethod}Value(\$value));
+  \$this->{$this->getPropertyObjectsSetter()}(\${$propertyName});
   return \$this;
 }
 
 /**
- * returns an array of all matching values for given property
+ * returns an array of all matching values for given $propertyName
  * the array keys are the values ID
  * @todo enhance the case an id is given
  * @todo check the case there is an id but does not exists
  *
- * @param string    \$propertyName    the name of properties to retrieve
+ * @param string    \${$propertyName}Name    the name of {$propertiesName} to retrieve
  * @param mixed     \$default         The default value to use
- * @param Integer   \$id              The unique id of the property to retrieve
+ * @param Integer   \$id              The unique id of the $propertyName to retrieve
  * @param PropelPDO \$con             Optional connection object
  *
- * @return array  the list of matching properties (prop_id => value).
+ * @return array  the list of matching $propertiesName (prop_id => value).
  */
-public function getPropertiesByName(\$propertyName, \$default = array(), \$id = null, PropelPDO \$con = null)
+public function get{$propertiesNameMethod}ByName(\${$propertyName}Name, \$default = array(), \$id = null, PropelPDO \$con = null)
 {
   \$ret = array();
-  \$properties = \$this->getPropertiesObjectsByName(\$propertyName, \$con);
-  foreach(\$properties as \$key => \$prop)
+  \${$propertiesName} = \$this->get{$propertiesNameMethod}ObjectsByName(\${$propertyName}Name, \$con);
+  foreach(\${$propertiesName} as \$key => \${$propertyName})
   {
-    \$ret[\$key] = \$prop->{$this->getPropertyColumnGetter('property_value_column')}();
+    \$ret[\$key] = \${$propertyName}->{$this->getPropertyColumnGetter('property_value_column')}();
   }
-  // is there a property id ?
+  // is there a $propertyName id ?
   if (!is_null(\$id) && isset(\$ret[\$id]))
   {
     return \$ret[\$id];
@@ -626,40 +663,45 @@ EOF;
 
     protected function getGetExtraPropertiesMethods()
     {
+        $propertyName = $this->getParameter('property_name');
+        $propertyNameMethod = ucfirst($propertyName);
+        $propertiesName = $this->getPluralForm($propertyName);
+        $propertiesNameMethod = ucfirst($propertiesName);
+
         return <<<EOF
 /**
- * returns an associative array with the properties and associated values.
+ * returns an associative array with the {$propertiesName} and associated values.
  *
- * @deprecated Prefer the getProperties() method
+ * @deprecated Prefer the get{$propertiesNameMethod}() method
  *
  * @return array
  */
-public function getExtraProperties(\$con = null)
+public function getExtra{$propertiesNameMethod}(\$con = null)
 {
-  return \$this->getProperties(\$con);
+  return \$this->get{$propertiesNameMethod}(\$con);
 }
 
 /**
- * returns an associative array with the properties and associated values.
+ * returns an associative array with the {$propertiesName} and associated values.
  *
  * @return array
  */
-public function getProperties(\$con = null)
+public function get{$propertiesNameMethod}(\$con = null)
 {
   \$ret = array();
 
-  // init with default single and multiple properties
-  \$ret = array_merge(\$ret, \$this->extraProperties);
-  foreach (\$this->multipleExtraProperties as \$propertyName => \$default) {
-    \$ret[\$propertyName] = array();
+  // init with default single and multiple {$propertiesName}
+  \$ret = array_merge(\$ret, \$this->extra{$propertiesNameMethod});
+  foreach (\$this->multipleExtra{$propertiesNameMethod} as \${$propertyName}Name => \$default) {
+    \$ret[\${$propertyName}Name] = array();
   }
 
-  foreach (\$this->{$this->getPropertyObjectsGetter()}(null, \$con) as \$property) {
-    \$pname = \$property->{$this->getPropertyColumnGetter('property_name_column')}();
-    \$pvalue = \$property->{$this->getPropertyColumnGetter('property_value_column')}();
+  foreach (\$this->{$this->getPropertyObjectsGetter()}(null, \$con) as \${$propertyName}) {
+    \$pname = \${$propertyName}->{$this->getPropertyColumnGetter('property_name_column')}();
+    \$pvalue = \${$propertyName}->{$this->getPropertyColumnGetter('property_value_column')}();
 
-    if (array_key_exists(\$pname, \$this->extraProperties)) {
-      // single property
+    if (array_key_exists(\$pname, \$this->extra{$propertiesNameMethod})) {
+      // single $propertyName
       \$ret[\$pname] = \$pvalue;
     }
     elseif (array_key_exists(\$pname, \$ret) && is_array(\$ret[\$pname])){
@@ -673,10 +715,10 @@ public function getProperties(\$con = null)
     }
   }
 
-  // set multiple properties default
-  foreach (\$this->multipleExtraProperties as \$propertyName => \$default) {
-    if (!is_null(\$default) && !count(\$ret[\$propertyName])) {
-      \$ret[\$propertyName][] = \$default;
+  // set multiple {$propertiesName} default
+  foreach (\$this->multipleExtra{$propertiesNameMethod} as \${$propertyName}Name => \$default) {
+    if (!is_null(\$default) && !count(\$ret[\${$propertyName}Name])) {
+      \$ret[\${$propertyName}Name][] = \$default;
     }
   }
 
@@ -687,6 +729,11 @@ EOF;
 
     public function objectCall()
     {
+        $propertyName = $this->getParameter('property_name');
+        $propertyNameMethod = ucfirst($propertyName);
+        $propertiesName = $this->getPluralForm($propertyName);
+        $propertiesNameMethod = ucfirst($propertiesName);
+
         if(floatval(substr(Propel::VERSION, 0, 3)) >= 1.5) {
             $methodVar = '$name';
             $paramVar = '$params';
@@ -696,73 +743,73 @@ EOF;
         }
 
         $script = <<<EOF
-// calls the registered properties dedicated functions
+// calls the registered {$propertiesName} dedicated functions
 if(in_array(\$methodName = substr({$methodVar}, 0,3), array('add', 'set', 'has', 'get')))
 {
-  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$this->extraPropertyNameFromMethod(substr({$methodVar}, 3)));
+  \${$propertyName}Name = {$this->peerClassname}::normalize{$propertyNameMethod}Name(\$this->extra{$propertyNameMethod}NameFromMethod(substr({$methodVar}, 3)));
 }
 else if(in_array(\$methodName = substr({$methodVar}, 0,5), array('count', 'clear')))
 {
-  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$this->extraPropertyNameFromMethod(substr({$methodVar}, 5)));
+  \${$propertyName}Name = {$this->peerClassname}::normalize{$propertyNameMethod}Name(\$this->extra{$propertyNameMethod}NameFromMethod(substr({$methodVar}, 5)));
 }
 else if(in_array(\$methodName = substr({$methodVar}, 0,6), array('delete', 'update')))
 {
-  \$propertyName = {$this->peerClassname}::normalizeExtraPropertyName(\$this->extraPropertyNameFromMethod(substr({$methodVar}, 6)));
+  \${$propertyName}Name = {$this->peerClassname}::normalize{$propertyNameMethod}Name(\$this->extra{$propertyNameMethod}NameFromMethod(substr({$methodVar}, 6)));
 }
-if(isset(\$propertyName))
+if(isset(\${$propertyName}Name))
 {
-  if(array_key_exists(\$propertyName, \$this->extraProperties))
+  if(array_key_exists(\${$propertyName}Name, \$this->extra{$propertiesNameMethod}))
   {
     switch(\$methodName)
     {
       case 'add':
       case 'set':
-        \$callable = array(\$this, 'setProperty');
+        \$callable = array(\$this, 'set{$propertyNameMethod}');
         break;
       case 'get':
-        \$callable = array(\$this, 'getProperty');
+        \$callable = array(\$this, 'get{$propertyNameMethod}');
         break;
       case 'has':
-        \$callable = array(\$this, 'hasProperty');
+        \$callable = array(\$this, 'has{$propertyNameMethod}');
         break;
       case 'count':
-        \$callable = array(\$this, 'countPropertiesByName');
+        \$callable = array(\$this, 'count{$propertiesNameMethod}ByName');
         break;
       case 'clear':
       case 'delete':
-        \$callable = array(\$this, 'deletePropertiesByName');
+        \$callable = array(\$this, 'delete{$propertiesNameMethod}ByName');
         break;
       case 'update':
-        \$callable = array(\$this, 'setPropertyByName');
+        \$callable = array(\$this, 'set{$propertyNameMethod}ByName');
         break;
     }
   }
-  else if(array_key_exists(\$propertyName, \$this->multipleExtraProperties) ||
-          ('S' == substr(\$propertyName, -1) && array_key_exists(\$propertyName = substr(\$propertyName, 0, -1), \$this->multipleExtraProperties)))
+  else if(array_key_exists(\${$propertyName}Name, \$this->multipleExtra{$propertiesNameMethod}) ||
+          ('S' == substr(\${$propertyName}Name, -1) && array_key_exists(\${$propertyName}Name = substr(\${$propertyName}Name, 0, -1), \$this->multipleExtra{$propertiesNameMethod})))
   {
     switch(\$methodName)
     {
       case 'add':
       case 'set':
-        \$callable = array(\$this, 'addProperty');
+        \$callable = array(\$this, 'add{$propertyNameMethod}');
         break;
       case 'get':
-        \$callable = array(\$this, 'getPropertiesByName');
+        \$callable = array(\$this, 'get{$propertiesNameMethod}ByName');
         break;
       case 'has':
-        \$callable = array(\$this, 'hasProperty');
+        \$callable = array(\$this, 'has{$propertyNameMethod}');
         break;
       case 'count':
-        \$callable = array(\$this, 'countPropertiesByName');
+        \$callable = array(\$this, 'count{$propertiesNameMethod}ByName');
         break;
       case 'clear':
-        \$callable = array(\$this, 'deletePropertiesByName');
+        \$callable = array(\$this, 'delete{$propertiesNameMethod}ByName');
         break;
       case 'delete':
-        \$callable = array(\$this, 'deletePropertyByNameAndId');
+        \$callable = array(\$this, 'delete{$propertyNameMethod}ByNameAndId');
         break;
       case 'update':
-        \$callable = array(\$this, 'setPropertyByNameAndId');
+        \$callable = array(\$this, 'set{$propertyNameMethod}ByNameAndId');
         break;
     }
   }
@@ -773,7 +820,7 @@ EOF;
     //* no error throw to make sure other behaviors can be called.
     else
     {
-      throw new RuntimeException(sprintf('Unknown property %s.<br />possible single properties: %s<br />possible multiple properties', \$propertyName, join(',', array_keys(\$this->extraProperties)), join(',', array_keys(\$this->multipleExtraProperties))));
+      throw new RuntimeException(sprintf('Unknown $propertyName %s.<br />possible single {$propertiesName}: %s<br />possible multiple {$propertiesName}', \${$propertyName}Name, join(',', array_keys(\$this->extra{$propertiesNameMethod})), join(',', array_keys(\$this->multipleExtra{$propertiesNameMethod}))));
     }
     //*/
 
@@ -782,7 +829,7 @@ EOF;
     $script .= <<<EOF
   if(isset(\$callable))
   {
-    array_unshift({$paramVar}, \$propertyName);
+    array_unshift({$paramVar}, \${$propertyName}Name);
     return call_user_func_array(\$callable, {$paramVar});
   }
 
