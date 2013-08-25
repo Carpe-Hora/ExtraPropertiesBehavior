@@ -72,6 +72,21 @@ EOF;
 EOF;
             PropelQuickBuilder::buildSchema($schema);
         }
+
+        if (!class_exists('Video')) {
+            $schema = <<<EOF
+<database name="medias">
+  <table name="video">
+    <column name="id" type="INTEGER" primaryKey="true" autoincrement="true" />
+    <column name="title" type="VARCHAR" size="255" />
+    <behavior name="extra_properties" >
+      <parameter name="property_name" value="parameter" />
+    </behavior>
+  </table>
+</database>
+EOF;
+            PropelQuickBuilder::buildSchema($schema);
+        }
     }
 
     public function testPropertyMethodsExists()
@@ -374,6 +389,40 @@ EOF;
         $obj->setProperty('bar', 24, $con); // bar should be updated
         $this->assertEquals(24, $obj->getProperty('bar', $con));
         $this->assertEquals(array(), $obj->getPropertiesByName('biz', array(), null, $con));
+    }
+
+    public function testWithCustomPropertyName()
+    {
+        $obj = new Video();
+        $con = Propel::getConnection();
+
+        $this->assertTrue(method_exists('Video', 'hasParameter'));
+        $this->assertTrue(method_exists('Video', 'countParametersByName'));
+        $this->assertTrue(method_exists('Video', 'initializeParameters'));
+        $this->assertTrue(method_exists('Video', 'getParameter'));
+        $this->assertTrue(method_exists('Video', 'setParameter'));
+        $this->assertTrue(method_exists('Video', 'addParameter'));
+        $this->assertTrue(method_exists('Video', 'getParametersByName'));
+        $this->assertTrue(method_exists('Video', 'registerParameter'));
+        $this->assertTrue(method_exists('Video', 'registerMultipleParameter'));
+
+        $this->assertFalse($obj->hasParameter('foo', $con));
+        $this->assertEquals(0, $obj->countParametersByName('foo', $con));
+        $this->assertEquals(array(), $obj->deleteParametersByName('foo', $con));
+        $this->assertNull($obj->getParameter('foo', null, $con));
+        $obj->setParameter('bar', 42, $con); // bar does not exist yet
+        $this->assertEquals(42, $obj->getParameter('bar', $con));
+        $obj->setParameter('bar', 24, $con); // bar should be updated
+        $this->assertEquals(24, $obj->getParameter('bar', $con));
+        $this->assertEquals(array(), $obj->getParametersByName('biz', array(), null, $con));
+    }
+
+    public function testWithCustomPropertyNameQuery()
+    {
+        $this->assertTrue(method_exists('VideoQuery', 'filterByParameter'));
+        $this->assertTrue(method_exists('VideoQuery', 'filterByExtraProperty'));
+        $this->assertTrue(method_exists('VideoQuery', 'filterByParameterWithDefault'));
+        $this->assertTrue(method_exists('VideoQuery', 'filterByExtraPropertyWithDefault'));
     }
 
     public function getPropertiesDataProvider()

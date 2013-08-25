@@ -14,7 +14,7 @@
  */
 class ExtraPropertiesBehaviorQueryBuilderModifier
 {
-    protected $behavior, $table, $builder, $objectClassname, $peerClassname, $queryClassname;
+    protected $behavior, $table, $builder, $objectClassname, $peerClassname, $queryClassname, $pluralizer;
 
     public function __construct($behavior)
     {
@@ -25,6 +25,15 @@ class ExtraPropertiesBehaviorQueryBuilderModifier
     protected function getParameter($key)
     {
         return $this->behavior->getParameter($key);
+    }
+
+    protected function getPluralForm($root)
+    {
+        if ($this->pluralizer === null) {
+            $this->pluralizer = new StandardEnglishPluralizer();
+        }
+
+        return $this->pluralizer->getPluralForm($root);
     }
 
     protected function setBuilder($builder)
@@ -57,6 +66,8 @@ class ExtraPropertiesBehaviorQueryBuilderModifier
     protected function addFilterByExtraProperty($builder)
     {
         return $this->behavior->renderTemplate('queryFilterByExtraProperty', array(
+            'propertyName'                  => $this->getParameter('property_name'),
+            'propertyNameMethod'            => ucfirst($this->getParameter('property_name')),
             'peerClassName'                 => $this->peerClassname,
             'shouldNormalize'               => 'true' === $this->getParameter('normalize'),
             'queryClassName'                => $this->queryClassname,
@@ -69,6 +80,8 @@ class ExtraPropertiesBehaviorQueryBuilderModifier
     protected function addFilterByExtraPropertyWithDefault($builder)
     {
         return $this->behavior->renderTemplate('queryFilterByExtraPropertyWithDefault', array(
+            'propertyName'                  => $this->getParameter('property_name'),
+            'propertyNameMethod'            => ucfirst($this->getParameter('property_name')),
             'peerClassName'                 => $this->peerClassname,
             'shouldNormalize'               => 'true' === $this->getParameter('normalize'),
             'queryClassName'                => $this->queryClassname,

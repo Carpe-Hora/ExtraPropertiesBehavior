@@ -13,7 +13,7 @@
  */
 class ExtraPropertiesBehaviorPeerBuilderModifier
 {
-    protected $behavior, $table;
+    protected $behavior, $table, $pluralizer;
 
     public function __construct($behavior)
     {
@@ -25,6 +25,15 @@ class ExtraPropertiesBehaviorPeerBuilderModifier
         return $this->behavior->getParameter($key);
     }
 
+    protected function getPluralForm($root)
+    {
+        if ($this->pluralizer === null) {
+            $this->pluralizer = new StandardEnglishPluralizer();
+        }
+
+        return $this->pluralizer->getPluralForm($root);
+    }
+
     public function shouldNormalize()
     {
         return 'true' === $this->getParameter('normalize');
@@ -32,24 +41,29 @@ class ExtraPropertiesBehaviorPeerBuilderModifier
 
     public function staticMethods()
     {
+        $propertyName = $this->getParameter('property_name');
+        $propertyNameMethod = ucfirst($propertyName);
+        $propertiesName = $this->getPluralForm($propertyName);
+        $propertiesNameMethod = ucfirst($propertiesName);
+
         $script = <<<EOF
 /**
- * Normalizes property name.
+ * Normalizes {$propertyName} name.
  *
- * @param String \$propertyName the property name to normalize.
- * @param String the normalized property name
+ * @param String \${$propertyName}Name the {$propertyName} name to normalize.
+ * @param String the normalized {$propertyName} name
  */
-static function normalizeExtraPropertyName(\$propertyName)
+static function normalize{$propertyNameMethod}Name(\${$propertyName}Name)
 {
 
 EOF;
         if ($this->shouldNormalize()) {
             $script .= <<<EOF
-  return strtoupper(\$propertyName);
+  return strtoupper(\${$propertyName}Name);
 EOF;
         } else {
             $script .= <<<EOF
-  return \$propertyName;
+  return \${$propertyName}Name;
 EOF;
         }
         $script .= <<<EOF
@@ -57,14 +71,40 @@ EOF;
 }
 
 /**
- * Normalizes property value.
+ * Normalizes {$propertyName} name.
  *
- * @param String \$propertyValue the property value to normalize.
- * @param String the normalized property value
+ * @deprecated see normalize{$propertyNameMethod}Name()
+ *
+ * @param String \${$propertyName}Name the {$propertyName} name to normalize.
+ * @param String the normalized {$propertyName} name
  */
-static function normalizeExtraPropertyValue(\$propertyValue)
+static function normalizeExtraPropertyName(\${$propertyName}Name)
 {
-  return \$propertyValue;
+  return self::normalize{$propertyNameMethod}Name(\${$propertyName}Name);
+}
+
+/**
+ * Normalizes {$propertyName} value.
+ *
+ * @param String \${$propertyName}Value the {$propertyName} value to normalize.
+ * @param String the normalized {$propertyName} value
+ */
+static function normalize{$propertyNameMethod}Value(\${$propertyName}Value)
+{
+  return \${$propertyName}Value;
+}
+
+/**
+ * Normalizes {$propertyName} value.
+ *
+ * @deprecated see normalize{$propertyNameMethod}Value()
+ *
+ * @param String \${$propertyName}Value the {$propertyName} value to normalize.
+ * @param String the normalized {$propertyName} value
+ */
+static function normalizeExtraPropertyValue(\${$propertyName}Value)
+{
+  return self::normalize{$propertyNameMethod}Value(\${$propertyName}Value);
 }
 EOF;
 
