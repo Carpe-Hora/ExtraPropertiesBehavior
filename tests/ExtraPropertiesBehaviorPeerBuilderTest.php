@@ -49,6 +49,20 @@ EOF;
 EOF;
             PropelQuickBuilder::buildSchema($schema);
         }
+        if (!class_exists('ExtraPropertiesBehaviorTestCustomName')) {
+            $schema = <<<EOF
+<database name="extra_properties_behavior_test_custom_name">
+  <table name="extra_properties_behavior_test_custom_name">
+    <column name="id" type="INTEGER" primaryKey="true" autoincrement="true" />
+    <column name="name" type="VARCHAR" size="255" />
+    <behavior name="extra_properties" >
+      <parameter name="property_name" value="parameter" />
+    </behavior>
+  </table>
+</database>
+EOF;
+            PropelQuickBuilder::buildSchema($schema);
+        }
     }
 
     public function allGeneratedClassesDataProvider()
@@ -65,6 +79,8 @@ EOF;
     public function testMethodExists($class)
     {
         $obj = new $class();
+        $this->assertTrue(method_exists($obj, 'normalizePropertyName'));
+        $this->assertTrue(method_exists($obj, 'normalizePropertyValue'));
         $this->assertTrue(method_exists($obj, 'normalizeExtraPropertyName'));
         $this->assertTrue(method_exists($obj, 'normalizeExtraPropertyValue'));
     }
@@ -123,5 +139,13 @@ EOF;
         $result = ExtraPropertiesBehaviorTestDoNotNormalizePeer::normalizeExtraPropertyValue($source);
         $this->assertInternalType('string', $result);
         $this->assertEquals($result, $expected);
+    }
+
+    public function testGeneratedPeerWithCustomName()
+    {
+        $this->assertTrue(method_exists('ExtraPropertiesBehaviorTestCustomNamePeer', 'normalizeParameterName'));
+        $this->assertTrue(method_exists('ExtraPropertiesBehaviorTestCustomNamePeer', 'normalizeParameterValue'));
+        $this->assertTrue(method_exists('ExtraPropertiesBehaviorTestCustomNamePeer', 'normalizeExtraPropertyName'));
+        $this->assertTrue(method_exists('ExtraPropertiesBehaviorTestCustomNamePeer', 'normalizeExtraPropertyValue'));
     }
 }
