@@ -61,6 +61,8 @@ class ExtraPropertiesBehavior extends Behavior
     {
         $table = $this->getTable();
         $database = $table->getDatabase();
+        $type = $database->getPlatform()->getDatabaseType();
+        $vendorInfo = $table->getVendorInfoForType($type);
         $propertyTableName = $this->getParameter('properties_table')
             ? $this->getParameter('properties_table')
             : $table->getName() . '_extra_property';
@@ -84,6 +86,7 @@ class ExtraPropertiesBehavior extends Behavior
             'namespace' => $table->getNamespace() ? '\\' . $table->getNamespace() : null,
         ));
         $propertyTable->isExtraPropertyTable = true;
+        $propertyTable->addVendorInfo($vendorInfo);
 
         // add id column
         $pk = $propertyTable->addColumn(array(
